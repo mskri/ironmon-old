@@ -1,17 +1,17 @@
 import { Client, Message, MessageReaction, Emoji, User, TextChannel, Guild } from 'discord.js';
-import { TriggerPermissions } from './typings';
+import { TriggerPermissions, ReactionEvent } from './typings';
 import { createMessageTriggerEvent } from './message-triggers/message-trigger-factory';
 import { availableMessageTriggers, messageTriggerQueue } from './message-triggers/message-trigger-queue';
-// import { reactionTriggerQueue, EventTypes } from './reaction-triggers';
+import { createReactionTriggerEvent } from './reaction-triggers/reaction-trigger-factory';
+import {
+    availableReactionTriggers,
+    allowedReactionEvents,
+    reactionTriggerQueue
+} from './reaction-triggers/reaction-trigger-queue';
 import { matchesTrigger, matchesReaction } from './utils/trigger-helpers';
 
 import preventDMs from './utils/preventDMs';
 import triggerPermissions from './configs/trigger-permissions';
-
-const allowedReactionEvents = {
-    MESSAGE_REACTION_ADD: 'messageReactionAdd',
-    MESSAGE_REACTION_REMOVE: 'messageReactionRemove'
-};
 
 export const onGuildCreate = (guild: Guild) => {
     console.log(`Joined a new guild ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
@@ -44,7 +44,7 @@ export const onMessage = (client: Client, message: Message) => {
     if (!trigger) return;
 
     const permissions = findTriggerPermissions(message.guild.id, trigger.name);
-    const messageTrigger = createMessageTriggerEvent(trigger, permissions, message);
+    const messageTrigger = createMessageTriggerEvent({ trigger, permissions, message });
 
     messageTriggerQueue.next(messageTrigger);
 };
@@ -79,12 +79,17 @@ export const onRaw = async (client: Client, event: any) => {
         reaction = new MessageReaction(message, emoji, 1, data.user_id === client.user.id);
     }
 
-    const reactionTrigger = {
+    const trigger = availableReactionTriggers.find(item => matchesReaction(item.reactions, reaction.emoji.id));
+
+    if (!trigger) return;
+
+    const reactionEvent: ReactionEvent = {
         type: event.t,
-        client,
         reaction,
         user
     };
+    const permissions = findTriggerPermissions(message.guild.id, trigger.name);
+    const reactionTrigger = createReactionTriggerEvent({ trigger, permissions, message, reactionEvent });
 
-    // reactionTriggerQueue.next(reactionTrigger);
+    reactionTriggerQueue.next(reactionTrigger);
 };

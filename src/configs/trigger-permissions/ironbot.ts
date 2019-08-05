@@ -34,6 +34,23 @@ const TriggerPermissions: TriggerPermissions[] = [
             ]
         },
         admins: ['302469039978971156']
+    },
+    {
+        triggers: ['smileReaction'],
+        guildId: '369588869794103297', // ironbot
+        channels: {
+            blacklisted: [],
+            whitelisted: [
+                '*' // all channels allowed
+            ]
+        },
+        roles: {
+            blacklisted: [],
+            whitelisted: [
+                '380065303440392203' // officers
+            ]
+        },
+        admins: ['302469039978971156']
     }
 ];
 
