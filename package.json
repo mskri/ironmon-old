@@ -1,0 +1,40 @@
+{
+    "name": "casperbot",
+    "version": "0.1.0",
+    "description": "Ironmon, a discord bot written with TypeScript.",
+    "main": "index.ts",
+    "author": "Sakari Mursu <sakari@mursu.dev>",
+    "scripts": {
+        "start": "npm run dev",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "dev": "cross-env NODE_ENV=development tsc-watch index.ts --outDir ./dist --onSuccess \"node ./dist/index.js\"",
+        "precommit": "pretty-quick --staged",
+        "lint": "eslint --ext .js .",
+        "lint:fix": "eslint --ext .js . --fix"
+    },
+    "dependencies": {
+        "@saple/string-command-args": "^0.1.0",
+        "@typescript-eslint/eslint-plugin": "^1.13.0",
+        "@typescript-eslint/parser": "^1.13.0",
+        "axios": "^0.18.1",
+        "bluebird": "^3.5.5",
+        "cross-env": "^5.2.0",
+        "discord.js": "^11.5.1",
+        "moment": "^2.24.0",
+        "moment-duration-format": "^2.3.2",
+        "moment-timezone": "^0.5.26",
+        "parse-duration": "^0.1.1",
+        "pg": "^7.12.0",
+        "pg-promise": "^8.7.5",
+        "tsc-watch": "^2.2.1",
+        "typescript": "^3.5.3"
+    },
+    "devDependencies": {
+        "dotenv-safe": "^6.1.0",
+        "eslint": "^5.16.0",
+        "eslint-config-prettier": "^2.10.0",
+        "eslint-plugin-prettier": "^2.7.0",
+        "prettier": "^1.18.2",
+        "pretty-quick": "^1.11.1"
+    }
+}
