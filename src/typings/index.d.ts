@@ -76,33 +76,3 @@ export type Reaction = {
     category: string;
     color: number;
 };
-
-// -----------------------------------------------------
-
-export type TriggerGroupConfig = {
-    name: string;
-    adminOnly: boolean;
-    triggers: string[];
-    outputChannel?: string;
-    channels: ChannelPermissions;
-    roles: RolePermissions;
-    reactions?: Reaction[];
-    requiredRole?: string;
-};
-
-export type ChannelPermissions = {
-    whitelisted: string[];
-    blacklisted: string[];
-};
-
-export type RolePermissions = {
-    whitelisted: string[];
-    blacklisted: string[];
-};
-
-export type GuildConfig = {
-    guildId: string;
-    admins: string[];
-    messageTriggers: TriggerGroupConfig[];
-    reactionTriggers: TriggerGroupConfig[];
-};
