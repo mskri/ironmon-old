@@ -1,4 +1,4 @@
-import { ReactionTrigger, ReactionTriggerEvent, ReactionTriggerConfig } from '../typings';
+import { ReactionTrigger, ReactionTriggerEvent, TriggerConfig } from '../typings';
 import {
     logExecution,
     hasAdminPermissions,
@@ -11,7 +11,7 @@ export const createReactionTrigger = (reactionTrigger: ReactionTrigger): Reactio
     return reactionTrigger;
 };
 
-export const createReactionTriggerEvent = (config: ReactionTriggerConfig): ReactionTriggerEvent => {
+export const createReactionTriggerEvent = (config: TriggerConfig): ReactionTriggerEvent => {
     const getType = (): string => {
         return config.reactionEvent.type;
     };
@@ -19,13 +19,13 @@ export const createReactionTriggerEvent = (config: ReactionTriggerConfig): React
     const onAddReaction = () => {
         const { trigger, message, reactionEvent } = config;
         logExecution(config);
-        trigger.onAddReaction(message, reactionEvent);
+        (<ReactionTrigger>trigger).onAddReaction(message, reactionEvent);
     };
 
     const onRemoveReaction = () => {
         const { trigger, message, reactionEvent } = config;
         logExecution(config);
-        trigger.onRemoveReaction(message, reactionEvent);
+        (<ReactionTrigger>trigger).onRemoveReaction(message, reactionEvent);
     };
 
     return {

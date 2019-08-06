@@ -1,4 +1,4 @@
-import { MessageTriggerEvent, MessageTrigger, MessageTriggerConfig } from '../typings';
+import { MessageTriggerEvent, MessageTrigger, TriggerConfig } from '../typings';
 import {
     logExecution,
     hasAdminPermissions,
@@ -11,11 +11,11 @@ export const createMessageTrigger = (messageTrigger: MessageTrigger): MessageTri
     return messageTrigger;
 };
 
-export const createMessageTriggerEvent = (config: MessageTriggerConfig): MessageTriggerEvent => {
+export const createMessageTriggerEvent = (config: TriggerConfig): MessageTriggerEvent => {
     const execute = (): void => {
         const { trigger, message } = config;
         logExecution(config);
-        trigger.execute(message);
+        (<MessageTrigger>trigger).execute(message);
     };
 
     return {

@@ -1,5 +1,5 @@
-import { Message, TextChannel, DMChannel, GroupDMChannel } from 'discord.js';
-import { DiscordUser, MessageTriggerConfig, ReactionTriggerConfig } from '../typings';
+import { Message, TextChannel, DMChannel, GroupDMChannel, GuildMember } from 'discord.js';
+import { DiscordUser, TriggerConfig } from '../typings';
 
 export const matchesTrigger = (trigger: RegExp, message: string): boolean => {
     return trigger instanceof RegExp ? trigger.test(message) : false;
@@ -44,17 +44,17 @@ export const getDiscordUser = (message: Message): DiscordUser => {
     };
 };
 
-export const getAuthorRolesArray = (message: Message): string[] => {
-    return Array.from(message.member.roles.keys());
+export const getRolesOfGuildMember = (member: GuildMember): string[] => {
+    return Array.from(member.roles.keys());
 };
 
-export const logExecution = (config: MessageTriggerConfig | ReactionTriggerConfig): void => {
+export const logExecution = (config: TriggerConfig): void => {
     const { message, trigger } = config;
     const user = getDiscordUser(message);
     console.log(`${user.full} executed ${trigger.name}`);
 };
 
-export const hasAdminPermissions = (config: MessageTriggerConfig | ReactionTriggerConfig): boolean => {
+export const hasAdminPermissions = (config: TriggerConfig): boolean => {
     const { permissions, message } = config;
     if (permissions.admins.length > 0) {
         return permissions.admins.includes(message.author.id);
@@ -63,7 +63,7 @@ export const hasAdminPermissions = (config: MessageTriggerConfig | ReactionTrigg
     return true;
 };
 
-export const isConfigured = (config: MessageTriggerConfig | ReactionTriggerConfig): boolean => {
+export const isConfigured = (config: TriggerConfig): boolean => {
     const { permissions } = config;
     const hasConfiguration = permissions != null;
 
@@ -74,15 +74,18 @@ export const isConfigured = (config: MessageTriggerConfig | ReactionTriggerConfi
     return hasConfiguration;
 };
 
-export const authorHasPermission = (config: MessageTriggerConfig | ReactionTriggerConfig): boolean => {
-    const { trigger, message, permissions } = config;
+export const authorHasPermission = (config: TriggerConfig): boolean => {
+    const { trigger, message, permissions, reactionEvent } = config;
     const user = getDiscordUser(message);
-    const authorRoles = getAuthorRolesArray(message);
     const roles = permissions.roles;
 
+    let member = reactionEvent ? reactionEvent.member : message.member;
+    const triggerAuthorRoles = getRolesOfGuildMember(member);
+
     // Does author have role which should be denied?
-    if (roles.blacklisted.some((role: string) => authorRoles.includes(role))) {
+    if (roles.blacklisted.some((role: string) => triggerAuthorRoles.includes(role))) {
         console.log(`Author has role which is blacklisted for ${trigger.name}`);
+        return false;
     }
 
     // If whitelisted roles has '*' allow all roles that are not blacklisted
@@ -99,7 +102,7 @@ export const authorHasPermission = (config: MessageTriggerConfig | ReactionTrigg
     }
 
     // Does author have whitelisted role?
-    if (roles.whitelisted.some((role: string) => authorRoles.includes(role))) {
+    if (roles.whitelisted.some(role => triggerAuthorRoles.includes(role))) {
         console.log(`Author ${user.full} has whitelisted role`);
         return true;
     }
@@ -107,7 +110,7 @@ export const authorHasPermission = (config: MessageTriggerConfig | ReactionTrigg
     return false;
 };
 
-export const isAllowedChannel = (config: MessageTriggerConfig | ReactionTriggerConfig): boolean => {
+export const isAllowedChannel = (config: TriggerConfig): boolean => {
     const { trigger, message, permissions } = config;
     const channel = message.channel;
     const channels = permissions.channels;

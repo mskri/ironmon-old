@@ -1,4 +1,4 @@
-import { Message, User, MessageReaction, Client } from 'discord.js';
+import { Message, User, MessageReaction, Client, GuildMember } from 'discord.js';
 
 export type MessageTriggerEvent = {
     authorHasPermission(): boolean;
@@ -39,26 +39,20 @@ export type ReactionTrigger = {
     onRemoveReaction(message: Message, event: ReactionEvent): void;
 };
 
-export type MessageTriggerConfig = {
-    trigger: MessageTrigger;
+export type TriggerConfig = {
+    trigger: MessageTrigger | ReactionTrigger;
     permissions: TriggerPermissions;
     message: Message;
-};
-
-export type ReactionTriggerConfig = {
-    trigger: ReactionTrigger;
-    permissions: TriggerPermissions;
-    message: Message;
-    reactionEvent: ReactionEvent;
+    reactionEvent?: ReactionEvent;
 };
 
 export type ReactionEvent = {
     type: string;
     reaction: MessageReaction;
-    user: User;
+    member: GuildMember;
 };
 
-export interface ReactionTriggerEvent {
+export type ReactionTriggerEvent = {
     getType(): string;
     authorHasPermission(): boolean;
     isConfigured(): boolean;
@@ -66,7 +60,7 @@ export interface ReactionTriggerEvent {
     hasAdminPermissions(): boolean;
     onAddReaction(): void;
     onRemoveReaction(): void;
-}
+};
 
 export type DiscordUser = {
     id: string;
