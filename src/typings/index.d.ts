@@ -1,6 +1,7 @@
 import { Message, User, MessageReaction, Client, GuildMember } from 'discord.js';
 
 export type MessageTriggerEvent = {
+    logInit(): void;
     authorHasPermission(): boolean;
     isConfigured(): boolean;
     isAllowedChannel(): boolean;
@@ -53,6 +54,7 @@ export type ReactionEvent = {
 };
 
 export type ReactionTriggerEvent = {
+    logInit(): void;
     getType(): string;
     authorHasPermission(): boolean;
     isConfigured(): boolean;

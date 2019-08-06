@@ -1,6 +1,7 @@
 import { ReactionTrigger, ReactionTriggerEvent, TriggerConfig } from '../typings';
 import {
     logExecution,
+    logInit,
     hasAdminPermissions,
     isConfigured,
     isAllowedChannel,
@@ -32,6 +33,7 @@ export const createReactionTriggerEvent = (config: TriggerConfig): ReactionTrigg
         getType,
         onAddReaction,
         onRemoveReaction,
+        logInit: () => logInit(config),
         isConfigured: () => isConfigured(config),
         isAllowedChannel: () => isAllowedChannel(config),
         hasAdminPermissions: () => hasAdminPermissions(config),

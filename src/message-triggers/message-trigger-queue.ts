@@ -1,5 +1,5 @@
 import { RxQueue } from 'rx-queue';
-import { filter } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { MessageTriggerEvent } from '../typings';
 
 // TODO: Figure a better way to include all the triggers rather than needing to import all of them one-by-one?
@@ -14,6 +14,10 @@ export const availableMessageTriggers = [getChannelId, getEmojiId, sayHello, get
 export const messageTriggerQueue = new RxQueue<MessageTriggerEvent>();
 messageTriggerQueue
     .pipe(
+        map(trigger => {
+            trigger.logInit();
+            return trigger;
+        }),
         filter(trigger => trigger.isConfigured()),
         filter(trigger => trigger.isAllowedChannel()),
         filter(trigger => trigger.authorHasPermission())

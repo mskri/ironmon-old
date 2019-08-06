@@ -1,5 +1,5 @@
 import { RxQueue } from 'rx-queue';
-import { filter } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { ReactionTriggerEvent } from '../typings';
 
 import smile from './signup-system/smile';
@@ -17,6 +17,10 @@ export const availableReactionTriggers = [smile, eventSignup];
 export const reactionTriggerQueue = new RxQueue<ReactionTriggerEvent>();
 reactionTriggerQueue
     .pipe(
+        map(trigger => {
+            trigger.logInit();
+            return trigger;
+        }),
         filter(trigger => trigger.isConfigured()),
         filter(trigger => trigger.isAllowedChannel()),
         filter(trigger => trigger.authorHasPermission())

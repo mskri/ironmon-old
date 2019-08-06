@@ -24,12 +24,12 @@ export const sendToChannel = (channel: TextChannel | DMChannel | GroupDMChannel,
 //     });
 // };
 
-export const getDiscordUser = (message: Message): DiscordUser => {
-    const author = message.author;
-    const member = message.guild.members.find(member => member.id === author.id);
+export const getDiscordUser = (member: GuildMember): DiscordUser => {
+    // const author = message.author;
+    // const member = message.guild.members.find(member => member.id === author.id);
 
     if (!member) {
-        console.error(`Could not find member in guild with ID (${author.id})`);
+        console.error(`Could not find member in guild with ID (${member.id})`);
         return;
     }
 
@@ -39,7 +39,7 @@ export const getDiscordUser = (message: Message): DiscordUser => {
         id: member.user.id,
         username: username,
         discriminator: member.user.discriminator,
-        full: `${username} (${member.user.username}#${member.user.discriminator}/${author.id})`,
+        full: `${member.user.username}#${member.user.discriminator}/${member.id}`,
         ping: `<@${member.user.id}>`
     };
 };
@@ -49,9 +49,17 @@ export const getRolesOfGuildMember = (member: GuildMember): string[] => {
 };
 
 export const logExecution = (config: TriggerConfig): void => {
-    const { message, trigger } = config;
-    const user = getDiscordUser(message);
-    console.log(`${user.full} executed ${trigger.name}`);
+    const { message, trigger, reactionEvent } = config;
+    const member = reactionEvent ? reactionEvent.member : message.member;
+    const user = getDiscordUser(member);
+    console.log(`${trigger.name} | ${user.full} executed trigger`);
+};
+
+export const logInit = (config: TriggerConfig): void => {
+    const { message, trigger, reactionEvent } = config;
+    const member = reactionEvent ? reactionEvent.member : message.member;
+    const user = getDiscordUser(member);
+    console.log(`${trigger.name} | initiated by ${user.full}`);
 };
 
 export const hasAdminPermissions = (config: TriggerConfig): boolean => {
@@ -64,11 +72,11 @@ export const hasAdminPermissions = (config: TriggerConfig): boolean => {
 };
 
 export const isConfigured = (config: TriggerConfig): boolean => {
-    const { permissions } = config;
+    const { permissions, trigger } = config;
     const hasConfiguration = permissions != null;
 
     if (!hasConfiguration) {
-        console.error(`No configuration found for ${config.trigger.name}`);
+        console.error(`${trigger.name} | no configuration found`);
     }
 
     return hasConfiguration;
@@ -76,15 +84,14 @@ export const isConfigured = (config: TriggerConfig): boolean => {
 
 export const authorHasPermission = (config: TriggerConfig): boolean => {
     const { trigger, message, permissions, reactionEvent } = config;
-    const user = getDiscordUser(message);
+    const member = reactionEvent ? reactionEvent.member : message.member;
+    const user = getDiscordUser(member);
     const roles = permissions.roles;
-
-    let member = reactionEvent ? reactionEvent.member : message.member;
     const triggerAuthorRoles = getRolesOfGuildMember(member);
 
     // Does author have role which should be denied?
     if (roles.blacklisted.some((role: string) => triggerAuthorRoles.includes(role))) {
-        console.log(`Author has role which is blacklisted for ${trigger.name}`);
+        console.error(`${trigger.name} | ${user.full} has blacklisted role`);
         return false;
     }
 
@@ -93,17 +100,17 @@ export const authorHasPermission = (config: TriggerConfig): boolean => {
         // If blacklisted roles isn't empty there's contradiction.
         // All roles can't be allowed if n is blacklisted
         if (roles.blacklisted.length === 0) {
-            console.log('All roles whitelisted');
+            console.log(`${trigger.name} | all roles are whitelisted`);
             return true;
         } else {
-            console.error('All roles whitelisted but blacklist is not empty!');
+            console.error(`${trigger.name} | all roles are whitelisted but blacklist is not empty`);
             return false;
         }
     }
 
     // Does author have whitelisted role?
     if (roles.whitelisted.some(role => triggerAuthorRoles.includes(role))) {
-        console.log(`Author ${user.full} has whitelisted role`);
+        console.log(`${trigger.name} | ${user.full} has whitelisted role`);
         return true;
     }
 
@@ -117,7 +124,7 @@ export const isAllowedChannel = (config: TriggerConfig): boolean => {
 
     // Check if the channels message was sent is blacklisted
     if (channels.blacklisted.some(channelId => channelId == channel.id)) {
-        console.log(`Channel ${channel.id} is blacklisted for ${trigger.name}`);
+        console.error(`${trigger.name} | channel ${channel.id} is blacklisted`);
         return false;
     }
 
@@ -126,17 +133,17 @@ export const isAllowedChannel = (config: TriggerConfig): boolean => {
         // If blacklisted channels isn't empty there's contradiction.
         // All channels can't be allowed if n is blacklisted
         if (channels.blacklisted.length === 0) {
-            console.log(`All channels whitelisted for ${trigger.name}`);
+            console.log(`${trigger.name} | all channels are whitelisted`);
             return true;
         } else {
-            console.error(`All channels whitelisted for ${trigger.name} but blacklist is not empty`);
+            console.error(`${trigger.name} |  all channels are whitelisted but blacklist is not empty`);
             return false;
         }
     }
 
     // If not every channel is whitelisted we check for whitelisted channels
     if (channels.whitelisted.some(channelId => channelId == channel.id)) {
-        console.log(`Channel ${channel.id} is whitelisted for ${trigger.name}`);
+        console.log(`${trigger.name} | channel ${channel.id} is whitelisted`);
         return true;
     }
 

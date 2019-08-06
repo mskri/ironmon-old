@@ -1,6 +1,7 @@
 import { MessageTriggerEvent, MessageTrigger, TriggerConfig } from '../typings';
 import {
     logExecution,
+    logInit,
     hasAdminPermissions,
     isConfigured,
     isAllowedChannel,
@@ -20,6 +21,7 @@ export const createMessageTriggerEvent = (config: TriggerConfig): MessageTrigger
 
     return {
         execute,
+        logInit: () => logInit(config),
         isConfigured: () => isConfigured(config),
         isAllowedChannel: () => isAllowedChannel(config),
         hasAdminPermissions: () => hasAdminPermissions(config),
