@@ -17,6 +17,7 @@ messageTriggerQueue
             return trigger;
         }),
         filter(trigger => trigger.isConfigured()),
+        filter(trigger => trigger.authorHasPermissionFlags()),
         filter(trigger => trigger.isAllowedChannel()),
         filter(trigger => trigger.authorHasPermission())
     )
@@ -32,6 +33,7 @@ reactionTriggerQueue
             return trigger;
         }),
         filter(trigger => trigger.isConfigured()),
+        filter(trigger => trigger.authorHasPermissionFlags()),
         filter(trigger => trigger.isAllowedChannel()),
         filter(trigger => trigger.authorHasPermission())
     )

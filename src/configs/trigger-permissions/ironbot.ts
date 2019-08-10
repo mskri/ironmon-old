@@ -48,6 +48,23 @@ const TriggerPermissions: TriggerPermissions[] = [
             ]
         },
         admins: ['302469039978971156']
+    },
+    {
+        triggers: ['deleteMessageReaction'],
+        channels: {
+            blacklisted: [],
+            whitelisted: [
+                '*' // all channels allowed
+            ]
+        },
+        roles: {
+            blacklisted: [],
+            whitelisted: [
+                '380065303440392203' // officers
+            ]
+        },
+        admins: [],
+        permissionFlags: ['MANAGE_MESSAGES']
     }
 ];
 

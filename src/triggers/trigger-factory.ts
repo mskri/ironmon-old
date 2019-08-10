@@ -2,9 +2,10 @@ import { MessageTriggerEvent, ReactionTriggerEvent, MessageTrigger, ReactionTrig
 import {
     logExecution,
     logInit,
-    hasAdminPermissions,
     isConfigured,
     isAllowedChannel,
+    authorHasPermissionFlags,
+    authorIsAdmin,
     authorHasPermission
 } from '../utils/trigger-helpers';
 
@@ -24,7 +25,8 @@ export const createMessageTriggerEvent = (config: TriggerConfig): MessageTrigger
         logInit: () => logInit(config),
         isConfigured: () => isConfigured(config),
         isAllowedChannel: () => isAllowedChannel(config),
-        hasAdminPermissions: () => hasAdminPermissions(config),
+        authorHasPermissionFlags: () => authorHasPermissionFlags(config),
+        authorIsAdmin: () => authorIsAdmin(config),
         authorHasPermission: () => authorHasPermission(config)
     };
 };
@@ -57,7 +59,8 @@ export const createReactionTriggerEvent = (config: TriggerConfig): ReactionTrigg
         logInit: () => logInit(config),
         isConfigured: () => isConfigured(config),
         isAllowedChannel: () => isAllowedChannel(config),
-        hasAdminPermissions: () => hasAdminPermissions(config),
+        authorHasPermissionFlags: () => authorHasPermissionFlags(config),
+        authorIsAdmin: () => authorIsAdmin(config),
         authorHasPermission: () => authorHasPermission(config)
     };
 };

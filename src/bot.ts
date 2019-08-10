@@ -76,7 +76,7 @@ export const onRaw = async (client: Client, event: any) => {
         reaction = new MessageReaction(message, emoji, 1, data.user_id === client.user.id);
     }
 
-    const trigger = reactionTriggers.find(item => matchesReaction(item.reactions, reaction.emoji.id));
+    const trigger = reactionTriggers.find(item => matchesReaction(item.reactions, reaction.emoji));
 
     if (!trigger) return;
 

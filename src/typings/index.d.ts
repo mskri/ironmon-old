@@ -5,7 +5,8 @@ export type MessageTriggerEvent = {
     authorHasPermission(): boolean;
     isConfigured(): boolean;
     isAllowedChannel(): boolean;
-    hasAdminPermissions(): boolean;
+    authorIsAdmin(): boolean;
+    authorHasPermissionFlags(): boolean;
     execute(): void;
 };
 
@@ -17,10 +18,10 @@ export type MessageTrigger = {
 
 export type TriggerPermissions = {
     triggers: string[];
-    guildId: string;
     channels: PermissionChannels;
     roles: PermissionRoles;
     admins: string[];
+    permissionFlags?: string[];
 };
 
 export type PermissionChannels = {
@@ -35,7 +36,7 @@ export type PermissionRoles = {
 
 export type ReactionTrigger = {
     name: string;
-    reactions: string[];
+    reactions: string[]; // ID or identifiers
     onAddReaction(message: Message, event: ReactionEvent): void;
     onRemoveReaction(message: Message, event: ReactionEvent): void;
 };
@@ -59,7 +60,8 @@ export type ReactionTriggerEvent = {
     authorHasPermission(): boolean;
     isConfigured(): boolean;
     isAllowedChannel(): boolean;
-    hasAdminPermissions(): boolean;
+    authorIsAdmin(): boolean;
+    authorHasPermissionFlags(): boolean;
     onAddReaction(): void;
     onRemoveReaction(): void;
 };

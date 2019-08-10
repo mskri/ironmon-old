@@ -1,33 +1,39 @@
-import { Message, TextChannel, DMChannel, GroupDMChannel, GuildMember, RichEmbed } from 'discord.js';
+import {
+    Message,
+    TextChannel,
+    DMChannel,
+    GroupDMChannel,
+    GuildMember,
+    RichEmbed,
+    Permissions,
+    PermissionResolvable,
+    ReactionEmoji,
+    Emoji
+} from 'discord.js';
 import { DiscordUser, TriggerConfig } from '../typings';
+
+// TODO: make logging better, maybe util function? Now e.g. user's details need to be parsed multiple times
 
 export const matchesTrigger = (trigger: RegExp, message: string): boolean => {
     return trigger instanceof RegExp ? trigger.test(message) : false;
 };
 
-export const matchesReaction = (reactions: string[], emojiId: string): boolean => {
-    return reactions.includes(emojiId);
+export const matchesReaction = (reactions: string[], emoji: Emoji | ReactionEmoji): boolean => {
+    return reactions.includes(emoji.id) || reactions.includes(emoji.name);
 };
 
 export const sendToChannel = (channel: TextChannel | DMChannel | GroupDMChannel, reply: string | RichEmbed): void => {
     channel.send(reply).catch(error => console.error(error));
 };
 
-// export const sendError = (channel: TextChannel | DMChannel | GroupDMChannel, errorMessage: string): void => {
-//     // TODO: move default to settings
-//     const deleteErrorMessageDelay = 5000; // 0 never delete
-
-//     channel.send(errorMessage).then((message: Message) => {
-//         if (deleteErrorMessageDelay > 0) {
-//             setTimeout(() => message.delete(), deleteErrorMessageDelay);
-//         }
-//     });
-// };
+export const sendErrorToChannel = (channel: TextChannel | DMChannel | GroupDMChannel, error: string): void => {
+    channel
+        .send(error)
+        .then((message: Message) => message.react('❌'))
+        .catch(error => console.error(error));
+};
 
 export const getDiscordUser = (member: GuildMember): DiscordUser => {
-    // const author = message.author;
-    // const member = message.guild.members.find(member => member.id === author.id);
-
     if (!member) {
         console.error(`Could not find member in guild with ID (${member.id})`);
         return;
@@ -81,10 +87,30 @@ export const logInit = (config: TriggerConfig): void => {
     console.log(`${trigger.name} | initiated by ${user.full}`);
 };
 
-export const hasAdminPermissions = (config: TriggerConfig): boolean => {
-    const { permissions, message } = config;
-    if (permissions.admins.length > 0) {
-        return permissions.admins.includes(message.author.id);
+export const authorHasPermissionFlags = (config: TriggerConfig): boolean => {
+    const { permissions, message, trigger, reactionEvent } = config;
+    const { permissionFlags } = permissions;
+    const member = reactionEvent ? reactionEvent.member : message.member;
+    const user = getDiscordUser(member);
+
+    if (permissionFlags && permissionFlags.length > 0) {
+        let requiredPermissions = [];
+
+        permissionFlags.forEach(flag => {
+            const permissionFlag = Permissions.FLAGS[flag];
+            if (permissionFlag) requiredPermissions.push(permissionFlag);
+        });
+
+        const hasRequiredPermissions = message.member.hasPermission([requiredPermissions]);
+
+        if (hasRequiredPermissions) {
+            console.log(`${trigger.name} | ${user.full} has required permission flags (${permissionFlags.join(', ')})`);
+        } else {
+            console.error(
+                `${trigger.name} | ${user.full} does not have required permission flags (${permissionFlags.join(', ')})`
+            );
+        }
+        return hasRequiredPermissions;
     }
 
     return true;
@@ -99,6 +125,15 @@ export const isConfigured = (config: TriggerConfig): boolean => {
     }
 
     return hasConfiguration;
+};
+
+export const authorIsAdmin = (config: TriggerConfig): boolean => {
+    const { permissions, message } = config;
+    if (permissions.admins.length > 0) {
+        return permissions.admins.includes(message.author.id);
+    }
+
+    return true;
 };
 
 export const authorHasPermission = (config: TriggerConfig): boolean => {

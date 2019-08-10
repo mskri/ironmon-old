@@ -5,7 +5,7 @@ import * as utc from 'dayjs/plugin/utc';
 import { Dayjs, UnitType } from 'dayjs';
 import { Message, RichEmbed, TextChannel } from 'discord.js';
 import { createMessageTrigger } from '../../triggers/trigger-factory';
-import { sendToChannel, getDiscordUsersWithRoleSorted } from '../../utils/trigger-helpers';
+import { sendToChannel, sendErrorToChannel, getDiscordUsersWithRoleSorted } from '../../utils/trigger-helpers';
 import { parseArgs, getMissingKeys } from '../../utils/parse-args';
 import { DiscordUser } from '../../typings';
 
@@ -147,7 +147,7 @@ export default createMessageTrigger({
             sendToChannel(message.channel, embed);
         } catch (error) {
             console.error(`${this.default.name} | ${error}`);
-            sendToChannel(message.channel, error);
+            sendErrorToChannel(message.channel, error);
         }
     }
 });
