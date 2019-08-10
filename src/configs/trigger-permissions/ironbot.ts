@@ -2,7 +2,7 @@ import { TriggerPermissions } from '../../typings';
 
 const TriggerPermissions: TriggerPermissions[] = [
     {
-        triggers: ['sayHello', 'getChannelId', 'getEmojiId', 'getRoleId', 'addSignupEvent'],
+        triggers: ['sayHello', 'getChannelId', 'getEmojiId', 'getRoleId', 'addEvent'],
         guildId: '369588869794103297', // ironbot
         channels: {
             blacklisted: [],

@@ -105,7 +105,7 @@ const formatFieldData = (users: DiscordUser[]): string =>
 const isValidHexColor = (hex: string): boolean => /^#[0-9A-F]{6}$/i.test(hex);
 
 export default createMessageTrigger({
-    name: 'addSignupEvent',
+    name: 'addEvent',
     trigger: new RegExp(/^!add-event\b/),
     execute: (message: Message) => {
         try {
