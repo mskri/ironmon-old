@@ -6,7 +6,7 @@ import { matchesTrigger, matchesReaction } from './triggers/helpers';
 import messageTriggers from './message-triggers';
 import reactionTriggers from './reaction-triggers';
 
-import preventDMs from './utils/preventDMs';
+import preventDM from './utils/prevent-dm';
 import triggerPermissions from './configs/trigger-permissions';
 
 export const onGuildCreate = (guild: Guild) => {
@@ -31,7 +31,7 @@ export const onMessage = (client: Client, message: Message) => {
     if (message.author.bot) return;
 
     // Ignore private messages (for now)
-    if (preventDMs(client, message)) return;
+    if (preventDM(client, message)) return;
 
     // Check if the message matches any triggers (commands)
     // Triggers are defined with regex and don't necessarily start with !command
