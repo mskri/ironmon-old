@@ -4,7 +4,7 @@ import * as relativeTime from 'dayjs/plugin/relativeTime';
 import * as utc from 'dayjs/plugin/utc';
 import { Dayjs, UnitType } from 'dayjs';
 import { Message, RichEmbed, TextChannel } from 'discord.js';
-import { createMessageTrigger } from '../message-trigger-factory';
+import { createMessageTrigger } from '../../triggers/trigger-factory';
 import { sendToChannel, getDiscordUsersWithRoleSorted } from '../../utils/trigger-helpers';
 import { parseArgs } from '../../utils/parse-args';
 import { DiscordUser } from '../../typings';

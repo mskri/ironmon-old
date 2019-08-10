@@ -1,4 +1,4 @@
-import { ReactionTrigger, ReactionTriggerEvent, TriggerConfig } from '../typings';
+import { MessageTriggerEvent, ReactionTriggerEvent, MessageTrigger, ReactionTrigger, TriggerConfig } from '../typings';
 import {
     logExecution,
     logInit,
@@ -7,6 +7,27 @@ import {
     isAllowedChannel,
     authorHasPermission
 } from '../utils/trigger-helpers';
+
+export const createMessageTrigger = (messageTrigger: MessageTrigger): MessageTrigger => {
+    return messageTrigger;
+};
+
+export const createMessageTriggerEvent = (config: TriggerConfig): MessageTriggerEvent => {
+    const execute = (): void => {
+        const { trigger, message } = config;
+        logExecution(config);
+        (<MessageTrigger>trigger).execute(message);
+    };
+
+    return {
+        execute,
+        logInit: () => logInit(config),
+        isConfigured: () => isConfigured(config),
+        isAllowedChannel: () => isAllowedChannel(config),
+        hasAdminPermissions: () => hasAdminPermissions(config),
+        authorHasPermission: () => authorHasPermission(config)
+    };
+};
 
 export const createReactionTrigger = (reactionTrigger: ReactionTrigger): ReactionTrigger => {
     return reactionTrigger;

@@ -1,9 +1,6 @@
 import { RxQueue } from 'rx-queue';
 import { filter, map } from 'rxjs/operators';
-import { ReactionTriggerEvent } from '../typings';
-
-import smile from './signup-system/smile';
-import eventSignup from './signup-system/event-signup';
+import { MessageTriggerEvent, ReactionTriggerEvent } from '../typings';
 
 // Note: should match MESSAGE_REACTION_ADD or MESSAGE_REACTION_REMOVE from discord.js
 // if discord.js changes that they should be changed to reflect the new ones here too.
@@ -12,7 +9,20 @@ export const allowedReactionEvents = {
     MESSAGE_REACTION_REMOVE: 'MESSAGE_REACTION_REMOVE'
 };
 
-export const availableReactionTriggers = [smile, eventSignup];
+export const messageTriggerQueue = new RxQueue<MessageTriggerEvent>();
+messageTriggerQueue
+    .pipe(
+        map(trigger => {
+            trigger.logInit();
+            return trigger;
+        }),
+        filter(trigger => trigger.isConfigured()),
+        filter(trigger => trigger.isAllowedChannel()),
+        filter(trigger => trigger.authorHasPermission())
+    )
+    .subscribe(trigger => {
+        trigger.execute();
+    });
 
 export const reactionTriggerQueue = new RxQueue<ReactionTriggerEvent>();
 reactionTriggerQueue
@@ -35,5 +45,3 @@ reactionTriggerQueue
                 break;
         }
     });
-
-// export default reactionTriggerQueue;

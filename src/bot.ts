@@ -1,14 +1,10 @@
 import { Client, Message, MessageReaction, Emoji, User, TextChannel, Guild } from 'discord.js';
 import { TriggerPermissions, ReactionEvent } from './typings';
-import { createMessageTriggerEvent } from './message-triggers/message-trigger-factory';
-import { availableMessageTriggers, messageTriggerQueue } from './message-triggers/message-trigger-queue';
-import { createReactionTriggerEvent } from './reaction-triggers/reaction-trigger-factory';
-import {
-    availableReactionTriggers,
-    allowedReactionEvents,
-    reactionTriggerQueue
-} from './reaction-triggers/reaction-trigger-queue';
+import { createMessageTriggerEvent, createReactionTriggerEvent } from './triggers/trigger-factory';
+import { allowedReactionEvents, messageTriggerQueue, reactionTriggerQueue } from './triggers/trigger-queue';
 import { matchesTrigger, matchesReaction } from './utils/trigger-helpers';
+import messageTriggers from './message-triggers';
+import reactionTriggers from './reaction-triggers';
 
 import preventDMs from './utils/preventDMs';
 import triggerPermissions from './configs/trigger-permissions';
@@ -39,7 +35,7 @@ export const onMessage = (client: Client, message: Message) => {
 
     // Check if the message matches any triggers (commands)
     // Triggers are defined with regex and don't necessarily start with !command
-    const trigger = availableMessageTriggers.find(item => matchesTrigger(item.trigger, message.content));
+    const trigger = messageTriggers.find(item => matchesTrigger(item.trigger, message.content));
 
     if (!trigger) return;
 
@@ -82,7 +78,7 @@ export const onRaw = async (client: Client, event: any) => {
         reaction = new MessageReaction(message, emoji, 1, data.user_id === client.user.id);
     }
 
-    const trigger = availableReactionTriggers.find(item => matchesReaction(item.reactions, reaction.emoji.id));
+    const trigger = reactionTriggers.find(item => matchesReaction(item.reactions, reaction.emoji.id));
 
     if (!trigger) return;
 
