@@ -1,4 +1,4 @@
-import { Message, TextChannel, DMChannel, GroupDMChannel, GuildMember } from 'discord.js';
+import { Message, TextChannel, DMChannel, GroupDMChannel, GuildMember, RichEmbed } from 'discord.js';
 import { DiscordUser, TriggerConfig } from '../typings';
 
 export const matchesTrigger = (trigger: RegExp, message: string): boolean => {
@@ -9,7 +9,7 @@ export const matchesReaction = (reactions: string[], emojiId: string): boolean =
     return reactions.includes(emojiId);
 };
 
-export const sendToChannel = (channel: TextChannel | DMChannel | GroupDMChannel, reply: string): void => {
+export const sendToChannel = (channel: TextChannel | DMChannel | GroupDMChannel, reply: string | RichEmbed): void => {
     channel.send(reply).catch(error => console.error(error));
 };
 
@@ -46,6 +46,25 @@ export const getDiscordUser = (member: GuildMember): DiscordUser => {
 
 export const getRolesOfGuildMember = (member: GuildMember): string[] => {
     return Array.from(member.roles.keys());
+};
+
+export function getUsersWithRole(members: GuildMember[], withRole: string) {
+    return members.filter(member => {
+        const isNotBot = !member.user.bot;
+        const hasRequiredRole = member.roles.some(role => role.name === withRole);
+        return isNotBot && hasRequiredRole;
+    });
+}
+
+export const getDiscordUsersWithRoleSorted = (channel: TextChannel, requiredRoleName: string): DiscordUser[] => {
+    const membersSorted = getUsersWithRole(channel.members.array(), requiredRoleName).sort(
+        (a: any, b: any) => a.username - b.username
+    );
+
+    let discordUsers: DiscordUser[] = [];
+    membersSorted.forEach(member => discordUsers.push(getDiscordUser(member)));
+
+    return discordUsers;
 };
 
 export const logExecution = (config: TriggerConfig): void => {

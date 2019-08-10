@@ -1,5 +1,11 @@
 import { Message, User, MessageReaction, Client, GuildMember } from 'discord.js';
 
+declare global {
+    interface String {
+        indexOfRegex(regexp: RegExp): number;
+    }
+}
+
 export type MessageTriggerEvent = {
     logInit(): void;
     authorHasPermission(): boolean;

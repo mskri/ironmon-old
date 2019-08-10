@@ -8,8 +8,9 @@ import getEmojiId from './generic/get-emoji-id';
 import sayHello from './generic/say-hello';
 import getRoleId from './generic/get-role-id';
 import panic from './system/panic';
+import addSignupEvent from './attendance/add-signup-event';
 
-export const availableMessageTriggers = [getChannelId, getEmojiId, sayHello, getRoleId, panic];
+export const availableMessageTriggers = [getChannelId, getEmojiId, sayHello, getRoleId, panic, addSignupEvent];
 
 export const messageTriggerQueue = new RxQueue<MessageTriggerEvent>();
 messageTriggerQueue
