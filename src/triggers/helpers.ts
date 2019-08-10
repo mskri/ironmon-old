@@ -6,7 +6,6 @@ import {
     GuildMember,
     RichEmbed,
     Permissions,
-    PermissionResolvable,
     ReactionEmoji,
     Emoji
 } from 'discord.js';

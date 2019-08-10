@@ -2,7 +2,7 @@ import { Client, Message, MessageReaction, Emoji, User, TextChannel, Guild } fro
 import { TriggerPermissions, ReactionEvent } from './typings';
 import { createMessageTriggerEvent, createReactionTriggerEvent } from './triggers/factory';
 import { allowedReactionEvents, messageTriggerQueue, reactionTriggerQueue } from './triggers/queue';
-import { matchesTrigger, matchesReaction } from './utils/trigger-helpers';
+import { matchesTrigger, matchesReaction } from './triggers/helpers';
 import messageTriggers from './message-triggers';
 import reactionTriggers from './reaction-triggers';
 

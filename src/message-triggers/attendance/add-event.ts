@@ -10,7 +10,7 @@ import {
     sendErrorToChannel,
     getDiscordUsersWithRoleSorted,
     getDiscordUser
-} from '../../utils/trigger-helpers';
+} from '../../triggers/helpers';
 import { parseArgs, findMissingKeys } from '../../utils/parse-args';
 import { DiscordUser } from '../../typings';
 

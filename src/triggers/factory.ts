@@ -7,7 +7,7 @@ import {
     authorHasPermissionFlags,
     authorIsAdmin,
     authorHasPermission
-} from '../utils/trigger-helpers';
+} from './helpers';
 
 export const createMessageTrigger = (messageTrigger: MessageTrigger): MessageTrigger => {
     return messageTrigger;

@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import { createMessageTrigger } from '../../triggers/factory';
-import { sendToChannel } from '../../utils/trigger-helpers';
+import { sendToChannel } from '../../triggers/helpers';
 // import apolloClient from '../../apollo';
 // import gql from 'graphql-tag';
 
