@@ -88,7 +88,7 @@ const getDescription = (start: Dayjs, durationArg: string, description: string):
 };
 
 const formatFieldData = (users: DiscordUser[]): string =>
-    users.length > 0 ? users.map(member => member.ping).join('\n') : '*—*';
+    users.length > 0 ? users.map(member => member.ping).join('\n') : '—';
 
 const isHexColorFormat = (hex: string): boolean => /^#[0-9A-F]{3,6}$/i.test(hex);
 
@@ -125,8 +125,6 @@ export default createMessageTrigger({
             }
 
             const body: string = getDescription(startTimeDate, duration, description);
-            const accepted: DiscordUser[] = getDiscordUsersWithRoleSorted(<TextChannel>channel, requiredRole);
-            const declined: DiscordUser[] = getDiscordUsersWithRoleSorted(<TextChannel>channel, requiredRole);
             const participants: DiscordUser[] = getDiscordUsersWithRoleSorted(<TextChannel>channel, requiredRole);
 
             const embed: RichEmbed = new RichEmbed()
@@ -136,8 +134,8 @@ export default createMessageTrigger({
                 .setAuthor('#1' /*, 'https://i.imgur.com/wSTFkRM.png'*/)
                 .setDescription(body)
                 .addBlankField()
-                .addField(`Accepted (${accepted.length})`, formatFieldData(participants), true)
-                .addField(`Declined (${declined.length})`, formatFieldData(participants), true)
+                .addField(`Accepted (0})`, '—', true)
+                .addField(`Declined (0)`, '—', true)
                 .addBlankField()
                 .addField(`Not set (${participants.length})`, formatFieldData(participants))
                 .addBlankField()
