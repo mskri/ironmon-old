@@ -1,7 +1,6 @@
 import { Message } from 'discord.js';
 import { ReactionEvent } from '../../typings';
 import { createReactionTrigger } from '../../triggers/factory';
-import { sendToChannel } from '../../utils/trigger-helpers';
 
 export default createReactionTrigger({
     name: 'eventSignupReaction',
@@ -11,9 +10,9 @@ export default createReactionTrigger({
         '481485649732698124' // declined
     ],
     onAddReaction: (message: Message, event: ReactionEvent) => {
-        sendToChannel(message.channel, `Added ${event.reaction.emoji.name}`);
+        event.reaction.remove();
     },
     onRemoveReaction: (message: Message, event: ReactionEvent) => {
-        sendToChannel(message.channel, `Removed ${event.reaction.emoji.name}`);
+        event.reaction.remove();
     }
 });

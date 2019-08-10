@@ -5,7 +5,11 @@ import * as utc from 'dayjs/plugin/utc';
 import { Dayjs, UnitType } from 'dayjs';
 import { Message, RichEmbed, TextChannel } from 'discord.js';
 import { createMessageTrigger } from '../../triggers/factory';
-import { sendToChannel, sendErrorToChannel, getDiscordUsersWithRoleSorted } from '../../utils/trigger-helpers';
+import {
+    sendToChannelwithReactions,
+    sendErrorToChannel,
+    getDiscordUsersWithRoleSorted
+} from '../../utils/trigger-helpers';
 import { parseArgs, getMissingKeys } from '../../utils/parse-args';
 import { DiscordUser } from '../../typings';
 
@@ -34,7 +38,6 @@ type Duration = [number, UnitType];
 
 const requiredRole = 'Raider all';
 const timestampFormat = 'YYYY-MM-DDTHH:mmZ';
-
 const requiredInputArgs = ['title', 'start', 'duration'];
 
 const getDurationAdditions = (duration): Duration[] => {
@@ -142,7 +145,8 @@ export default createMessageTrigger({
                 .setTimestamp()
                 .setFooter('Set your status by reacting with the emojis below');
 
-            sendToChannel(message.channel, embed);
+            const reactions = ['481485649732698124', '481485635836837888'];
+            sendToChannelwithReactions(channel, embed, reactions);
         } catch (error) {
             console.error(`${this.default.name} | ${error}`);
             sendErrorToChannel(message.channel, error);

@@ -22,8 +22,23 @@ export const matchesReaction = (reactions: string[], emoji: Emoji | ReactionEmoj
     return reactions.includes(emoji.id) || reactions.includes(emoji.name);
 };
 
-export const sendToChannel = (channel: TextChannel | DMChannel | GroupDMChannel, reply: string | RichEmbed): void => {
-    channel.send(reply).catch(error => console.error(error));
+export const sendToChannel = (channel: TextChannel | DMChannel | GroupDMChannel, message: string | RichEmbed): void => {
+    channel.send(message).catch(error => console.error(error));
+};
+
+export const sendToChannelwithReactions = (
+    channel: TextChannel | DMChannel | GroupDMChannel,
+    message: string | RichEmbed,
+    reactions: string[]
+): void => {
+    channel
+        .send(message)
+        .then(async (message: Message) => {
+            for (const emoji of reactions) {
+                await message.react(emoji);
+            }
+        })
+        .catch(error => console.error(error));
 };
 
 export const sendErrorToChannel = (channel: TextChannel | DMChannel | GroupDMChannel, error: string): void => {
