@@ -7,8 +7,7 @@ export default createReactionTrigger({
     reactions: [
         '❌' // :x:
     ],
-    onAddReaction: (message: Message, event: ReactionEvent) => {
+    onAddReaction: (message: Message, _: ReactionEvent) => {
         message.delete();
-    },
-    onRemoveReaction: (message: Message, event: ReactionEvent) => {}
+    }
 });

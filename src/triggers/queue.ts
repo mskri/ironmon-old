@@ -28,9 +28,19 @@ messageTriggerQueue
 export const reactionTriggerQueue = new RxQueue<ReactionTriggerEvent>();
 reactionTriggerQueue
     .pipe(
-        map(trigger => {
+        filter(trigger => {
+            // Does nothing if the function which should be triggered is not defined
+            switch (trigger.getType()) {
+                case allowedReactionEvents.MESSAGE_REACTION_ADD:
+                    if (!trigger.hasAddReaction()) return false;
+                    break;
+                case allowedReactionEvents.MESSAGE_REACTION_REMOVE:
+                    if (!trigger.hasRemoveReaction()) return false;
+                    break;
+            }
+
             trigger.logInit();
-            return trigger;
+            return true;
         }),
         filter(trigger => trigger.isConfigured()),
         filter(trigger => trigger.authorHasPermissionFlags()),

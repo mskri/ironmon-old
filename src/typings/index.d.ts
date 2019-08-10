@@ -37,8 +37,8 @@ export type PermissionRoles = {
 export type ReactionTrigger = {
     name: string;
     reactions: string[]; // ID or identifiers
-    onAddReaction(message: Message, event: ReactionEvent): void;
-    onRemoveReaction(message: Message, event: ReactionEvent): void;
+    onAddReaction?: (message: Message, event: ReactionEvent) => void | null;
+    onRemoveReaction?: (message: Message, event: ReactionEvent) => void | null;
 };
 
 export type TriggerConfig = {
@@ -51,19 +51,21 @@ export type TriggerConfig = {
 export type ReactionEvent = {
     type: string;
     reaction: MessageReaction;
-    member: GuildMember;
+    author: GuildMember;
 };
 
 export type ReactionTriggerEvent = {
-    logInit(): void;
-    getType(): string;
-    authorHasPermission(): boolean;
-    isConfigured(): boolean;
-    isAllowedChannel(): boolean;
-    authorIsAdmin(): boolean;
-    authorHasPermissionFlags(): boolean;
-    onAddReaction(): void;
-    onRemoveReaction(): void;
+    logInit: () => void;
+    getType: () => string;
+    authorHasPermission: () => boolean;
+    isConfigured: () => boolean;
+    isAllowedChannel: () => boolean;
+    authorIsAdmin: () => boolean;
+    authorHasPermissionFlags: () => boolean;
+    onAddReaction: () => void;
+    onRemoveReaction: () => void;
+    hasAddReaction: () => boolean;
+    hasRemoveReaction: () => boolean;
 };
 
 export type DiscordUser = {

@@ -40,22 +40,40 @@ export const createReactionTriggerEvent = (config: TriggerConfig): ReactionTrigg
         return config.reactionEvent.type;
     };
 
+    const hasAddReaction = (): boolean => {
+        return (<ReactionTrigger>config.trigger).onAddReaction != null;
+    };
+
+    const hasRemoveReaction = (): boolean => {
+        return (<ReactionTrigger>config.trigger).onRemoveReaction != null;
+    };
+
     const onAddReaction = () => {
-        const { trigger, message, reactionEvent } = config;
+        const { message, reactionEvent } = config;
+        const trigger = <ReactionTrigger>config.trigger;
+
         logExecution(config);
-        (<ReactionTrigger>trigger).onAddReaction(message, reactionEvent);
+
+        if (trigger.onAddReaction == null) return;
+        trigger.onAddReaction(message, reactionEvent);
     };
 
     const onRemoveReaction = () => {
-        const { trigger, message, reactionEvent } = config;
+        const { message, reactionEvent } = config;
+        const trigger = <ReactionTrigger>config.trigger;
+
         logExecution(config);
-        (<ReactionTrigger>trigger).onRemoveReaction(message, reactionEvent);
+
+        if (trigger.onRemoveReaction == null) return;
+        trigger.onRemoveReaction(message, reactionEvent);
     };
 
     return {
         getType,
         onAddReaction,
         onRemoveReaction,
+        hasAddReaction,
+        hasRemoveReaction,
         logInit: () => logInit(config),
         isConfigured: () => isConfigured(config),
         isAllowedChannel: () => isAllowedChannel(config),
