@@ -3,6 +3,7 @@ String.prototype.indexOfRegex = function(regex: RegExp) {
     return match ? this.indexOf(match[0]) : -1;
 };
 
+// Converts the value to boolean/number if they can be otherwise returns them as string
 const convertIfApplicable = (value: any): string | number | boolean => {
     if (isNaN(value)) {
         const isBooleanTrue = value.toString().toLowerCase() === 'true';
@@ -37,18 +38,17 @@ const processargvify = (input: string): string[] => {
     //     (\S)                  # Garbage
     // )                         #
     // (\s|$)?
-    const regex = /\s*(?:([^\s\\\'\"]+)|'((?:[^\'\\]|\\.)*)'|"((?:[^\"\\]|\\.)*)"|(\\.?)|(\S))(\s|$)?/;
+    const regExp = /\s*(?:([^\s\\\'\"]+)|'((?:[^\'\\]|\\.)*)'|"((?:[^\"\\]|\\.)*)"|(\\.?)|(\S))(\s|$)?/;
     return input
-        .split(regex)
+        .split(regExp)
         .filter(o => o) // Filter out undefined and nulls
         .filter(o => o.trim().length > 0) // Filter out blanks and spaces
         .slice(1); // Removes the command part from the beginning, e.g. '!add'
 };
 
-const commandPartRegex = /^--\w+/;
-
 export const parseArgs = <T>(input: string, defaults: T): T => {
-    let args = processargvify(input);
+    const argKeyRegExp = /^--\w+/;
+    let args = processargvify(input.trim());
     let props = {};
 
     for (let i = 0; i < args.length; i++) {
@@ -56,9 +56,12 @@ export const parseArgs = <T>(input: string, defaults: T): T => {
         const next = args[i + 1];
         const argName = removeStartHyphens(current);
 
-        if (next && next.indexOfRegex(commandPartRegex) >= 0) {
+        if ((next && next.indexOfRegex(argKeyRegExp) >= 0) || !next) {
+            // If next is already a new argKey then current argKey value is boolean
+            // also if next one is null while current is argKey it means that current
+            // argKey is boolean because we are at the end of the string
             props[argName] = true;
-        } else if (current.indexOfRegex(commandPartRegex) >= 0) {
+        } else if (next && current.indexOfRegex(argKeyRegExp) >= 0) {
             props[argName] = convertIfApplicable(next);
             i++;
         }
