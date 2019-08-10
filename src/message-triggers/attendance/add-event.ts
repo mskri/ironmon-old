@@ -6,7 +6,7 @@ import { Dayjs, UnitType } from 'dayjs';
 import { Message, RichEmbed, TextChannel } from 'discord.js';
 import { createMessageTrigger } from '../../triggers/trigger-factory';
 import { sendToChannel, getDiscordUsersWithRoleSorted } from '../../utils/trigger-helpers';
-import { parseArgs } from '../../utils/parse-args';
+import { parseArgs, getMissingKeys } from '../../utils/parse-args';
 import { DiscordUser } from '../../typings';
 
 dayjs.extend(customParseFormat);
@@ -36,17 +36,6 @@ const requiredRole = 'Raider all';
 const timestampFormat = 'YYYY-MM-DDTHH:mmZ';
 
 const requiredInputArgs = ['title', 'start', 'duration'];
-
-const getMissingKeys = (requiredKeys: string[], args: object = {}): string[] => {
-    let missingKeys: string[] = [];
-    requiredKeys.forEach((key: string) => {
-        if (!args.hasOwnProperty(key)) {
-            missingKeys.push(key);
-        }
-    });
-
-    return missingKeys;
-};
 
 const getDurationAdditions = (duration): Duration[] => {
     let additionsParams = duration.split(' ');
