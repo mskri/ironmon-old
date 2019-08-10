@@ -102,7 +102,8 @@ export default createMessageTrigger({
                 url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
             };
             const { content, channel } = message;
-            const inputArgs = content.slice(0, content.length);
+            // Remove the command part, .e.g '!add', from beginning of the message
+            const inputArgs = content.slice(this.default.trigger.length, content.length);
             const args = parseArgs(inputArgs, defaults);
             const missingKeys = getMissingKeys(requiredInputArgs, args);
 
