@@ -1,7 +1,7 @@
 import { Client, Message, MessageReaction, Emoji, User, TextChannel, Guild } from 'discord.js';
 import { TriggerPermissions, ReactionEvent } from './typings';
-import { createMessageTriggerEvent, createReactionTriggerEvent } from './triggers/trigger-factory';
-import { allowedReactionEvents, messageTriggerQueue, reactionTriggerQueue } from './triggers/trigger-queue';
+import { createMessageTriggerEvent, createReactionTriggerEvent } from './triggers/factory';
+import { allowedReactionEvents, messageTriggerQueue, reactionTriggerQueue } from './triggers/queue';
 import { matchesTrigger, matchesReaction } from './utils/trigger-helpers';
 import messageTriggers from './message-triggers';
 import reactionTriggers from './reaction-triggers';

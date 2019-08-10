@@ -1,5 +1,5 @@
 import { Message } from 'discord.js';
-import { createMessageTrigger } from '../../triggers/trigger-factory';
+import { createMessageTrigger } from '../../triggers/factory';
 
 export default createMessageTrigger({
     trigger: new RegExp(/^!panic\b/),

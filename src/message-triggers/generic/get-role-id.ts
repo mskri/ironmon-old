@@ -1,5 +1,5 @@
 import { Message, TextChannel } from 'discord.js';
-import { createMessageTrigger } from '../../triggers/trigger-factory';
+import { createMessageTrigger } from '../../triggers/factory';
 import { sendToChannel } from '../../utils/trigger-helpers';
 
 export default createMessageTrigger({

@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import { ReactionEvent } from '../../typings';
-import { createReactionTrigger } from '../../triggers/trigger-factory';
+import { createReactionTrigger } from '../../triggers/factory';
 import { sendToChannel } from '../../utils/trigger-helpers';
 
 export default createReactionTrigger({
