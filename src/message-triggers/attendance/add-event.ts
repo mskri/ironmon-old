@@ -3,11 +3,13 @@ import * as customParseFormat from 'dayjs/plugin/customParseFormat';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
 import * as utc from 'dayjs/plugin/utc';
 import { Dayjs, UnitType } from 'dayjs';
-import { Message, RichEmbed, TextChannel, Channel } from 'discord.js';
+import { Message, RichEmbed, TextChannel } from 'discord.js';
 import { createMessageTrigger } from '../../triggers/factory';
 import { sendToChannelwithReactions, sendErrorToChannel, getDiscordUsersWithRoleSorted } from '../../triggers/helpers';
 import { parseArgs, findMissingKeys } from '../../utils/parse-args';
 import { DiscordUser } from '../../typings';
+import { isHexColorFormat, isValidTimestampFormat } from '../../utils/validators';
+import { timestampFormat } from '../../configs/constants';
 import apolloClient from '../../apollo';
 import gql from 'graphql-tag';
 
@@ -52,7 +54,6 @@ type EventData = {
 
 const requiredRole = 'Raider all';
 const requiredArgs = ['title', 'start', 'duration'];
-const timestampFormat = 'YYYY-MM-DDTHH:mmZ';
 const defaultArgs: Args = {
     color: '#000000',
     url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
@@ -113,10 +114,6 @@ const formatFieldData = (users: DiscordUser[]): string => {
     if (users.length < 1) return '—';
     return users.map(member => member.ping).join('\n');
 };
-
-const isHexColorFormat = (hex: string): boolean => /^#[0-9A-F]{3,6}$/i.test(hex);
-
-const isValidTimestampFormat = (date: string): boolean => dayjs(date, timestampFormat).isValid();
 
 const createEventData = async (args: Args, message: Message): Promise<EventData> => {
     const { title, description, duration, url, color, start } = args;
