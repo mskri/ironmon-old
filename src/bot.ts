@@ -46,9 +46,7 @@ export const onMessage = (client: Client, message: Message) => {
 };
 
 const findTriggerPermissions = (guildId: string, triggerName: string): TriggerPermissions => {
-    return triggerPermissions.find(conf => {
-        return conf.guildId === guildId && conf.triggers.includes(triggerName);
-    });
+    return triggerPermissions[guildId].find(conf => conf.triggers.includes(triggerName));
 };
 
 export const onRaw = async (client: Client, event: any) => {

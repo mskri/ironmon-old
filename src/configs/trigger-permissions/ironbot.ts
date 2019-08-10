@@ -3,7 +3,6 @@ import { TriggerPermissions } from '../../typings';
 const TriggerPermissions: TriggerPermissions[] = [
     {
         triggers: ['sayHello', 'getChannelId', 'getEmojiId', 'getRoleId', 'addEvent'],
-        guildId: '369588869794103297', // ironbot
         channels: {
             blacklisted: [],
             whitelisted: [
@@ -20,7 +19,6 @@ const TriggerPermissions: TriggerPermissions[] = [
     },
     {
         triggers: ['panic'],
-        guildId: '369588869794103297', // ironbot
         channels: {
             blacklisted: [],
             whitelisted: [
@@ -36,8 +34,7 @@ const TriggerPermissions: TriggerPermissions[] = [
         admins: ['302469039978971156']
     },
     {
-        triggers: ['smileReaction', 'eventSignupReaction'],
-        guildId: '369588869794103297', // ironbot
+        triggers: ['eventSignupReaction'],
         channels: {
             blacklisted: [],
             whitelisted: [
