@@ -36,17 +36,13 @@ type EventTime = {
     duration: string;
 };
 
-type EventData = {
-    id: string;
+export type EventData = {
+    rowId: string;
     title: string;
     description: string;
     startTime: string;
     endTime: string;
-    authorId: string;
     color: string;
-    guildId: string;
-    channelId: string;
-    messageId: string;
     url: string;
     body: string;
     participants: DiscordUser[];
@@ -117,9 +113,9 @@ const formatFieldData = (users: DiscordUser[]): string => {
 
 const createEventData = async (args: Args, message: Message): Promise<EventData> => {
     const { title, description, duration, url, color, start } = args;
-    const { member, guild, channel } = message;
+    const { channel } = message;
 
-    const id = await apolloClient
+    const rowId = await apolloClient
         .query({
             query: gql`
                 query {
@@ -133,27 +129,25 @@ const createEventData = async (args: Args, message: Message): Promise<EventData>
         })
         .then(result => {
             const rowId = result.data.allEvents.nodes[0].rowId;
-            return `#${rowId}`;
+            return rowId + 1;
         });
 
     // Use utc because dayjs doesn't have output timezone, we make the output to be GMT+2
     // by adding 2 hours to UTC
-    const startTime: Dayjs = dayjs(start, timestampFormat).utc();
-    const endTime: Dayjs = calculateEndTime(startTime, duration).utc();
-    const body: string = getDescription(startTime, endTime, description);
+    const startDate: Dayjs = dayjs(start, timestampFormat).utc();
+    const startTime: string = startDate.format(timestampFormat);
+    const endDate: Dayjs = calculateEndTime(startDate, duration).utc();
+    const endTime: string = endDate.format(timestampFormat);
+    const body: string = getDescription(startDate, endDate, description);
     const participants: DiscordUser[] = getDiscordUsersWithRoleSorted(<TextChannel>channel, requiredRole);
 
     return {
-        id,
+        rowId,
         title,
         description,
-        startTime: startTime.format(timestampFormat),
-        endTime: endTime.format(timestampFormat),
-        authorId: member.id,
+        startTime,
+        endTime,
         color,
-        guildId: guild.id,
-        channelId: channel.id,
-        messageId: message.id,
         url,
         body,
         participants
@@ -161,13 +155,13 @@ const createEventData = async (args: Args, message: Message): Promise<EventData>
 };
 
 const createEmbed = (eventData: EventData): RichEmbed => {
-    const { id, color, title, url, body, participants } = eventData;
+    const { rowId, color, title, url, body, participants } = eventData;
 
     return new RichEmbed()
         .setColor(color)
         .setTitle(title)
         .setURL(url)
-        .setAuthor(id /*, 'https://i.imgur.com/wSTFkRM.png'*/)
+        .setAuthor(`#${rowId}` /*, 'https://i.imgur.com/wSTFkRM.png'*/)
         .setDescription(body)
         .addBlankField()
         .addField(`Accepted (0)`, '—', true)
@@ -179,10 +173,23 @@ const createEmbed = (eventData: EventData): RichEmbed => {
         .setFooter('Set your status by reacting with the emojis below');
 };
 
-const storeEvent = (eventData: EventData): void => {
+const storeEvent = (eventData: EventData, message: Message): void => {
+    const { member, guild, channel } = message;
+    const authorId: string = member.id;
+    const guildId: string = guild.id;
+    const channelId: string = channel.id;
+    const messageId: string = message.id;
+
+    const variables = Object.assign(eventData, {
+        authorId,
+        guildId,
+        channelId,
+        messageId
+    });
+
     apolloClient
         .mutate({
-            variables: eventData,
+            variables,
             mutation: gql`
                 mutation(
                     $title: String
@@ -219,7 +226,10 @@ const storeEvent = (eventData: EventData): void => {
                 }
             `
         })
-        .then(_ => console.log(`${this.default.name} | Stored event ${eventData.id} to database`))
+        .then(result => {
+            const rowId = result.data.createEvent.event.rowId;
+            console.log(`${this.default.name} | Stored event to database with ID ${rowId}`);
+        })
         .catch(error => console.log(error));
 };
 
@@ -250,8 +260,8 @@ export default createMessageTrigger({
             const embed = createEmbed(eventData);
             const reactions = ['481485649732698124', '481485635836837888'];
 
-            sendToChannelwithReactions(channel, embed, reactions).then(_ => {
-                storeEvent(eventData);
+            sendToChannelwithReactions(channel, embed, reactions).then(message => {
+                storeEvent(eventData, message);
             });
         } catch (error) {
             console.error(`${this.default.name} | ${error}`);

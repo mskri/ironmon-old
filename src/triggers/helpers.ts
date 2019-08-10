@@ -91,14 +91,14 @@ export const getDiscordUsersWithRoleSorted = (channel: TextChannel, requiredRole
 
 export const logExecution = (config: TriggerConfig): void => {
     const { message, trigger, reactionEvent } = config;
-    const member = reactionEvent ? reactionEvent.member : message.member;
+    const member = reactionEvent ? reactionEvent.author : message.member;
     const user = getDiscordUser(member);
     console.log(`${trigger.name} | ${user.full} executed trigger`);
 };
 
 export const logInit = (config: TriggerConfig): void => {
     const { message, trigger, reactionEvent } = config;
-    const member = reactionEvent ? reactionEvent.member : message.member;
+    const member = reactionEvent ? reactionEvent.author : message.member;
     const user = getDiscordUser(member);
     console.log(`${trigger.name} | initiated by ${user.full}`);
 };
@@ -106,7 +106,7 @@ export const logInit = (config: TriggerConfig): void => {
 export const authorHasPermissionFlags = (config: TriggerConfig): boolean => {
     const { permissions, message, trigger, reactionEvent } = config;
     const { permissionFlags } = permissions;
-    const member = reactionEvent ? reactionEvent.member : message.member;
+    const member = reactionEvent ? reactionEvent.author : message.member;
     const user = getDiscordUser(member);
 
     if (permissionFlags && permissionFlags.length > 0) {
@@ -154,7 +154,7 @@ export const authorIsAdmin = (config: TriggerConfig): boolean => {
 
 export const authorHasPermission = (config: TriggerConfig): boolean => {
     const { trigger, message, permissions, reactionEvent } = config;
-    const member = reactionEvent ? reactionEvent.member : message.member;
+    const member = reactionEvent ? reactionEvent.author : message.member;
     const user = getDiscordUser(member);
     const roles = permissions.roles;
     const triggerAuthorRoles = getRolesOfGuildMember(member);
