@@ -3,21 +3,22 @@ import * as customParseFormat from 'dayjs/plugin/customParseFormat';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
 import * as utc from 'dayjs/plugin/utc';
 import { Dayjs, UnitType } from 'dayjs';
-import { Message, RichEmbed, TextChannel } from 'discord.js';
+import { Message, RichEmbed, TextChannel, Channel } from 'discord.js';
 import { createMessageTrigger } from '../../triggers/factory';
 import {
     sendToChannelwithReactions,
     sendErrorToChannel,
-    getDiscordUsersWithRoleSorted
+    getDiscordUsersWithRoleSorted,
+    getDiscordUser
 } from '../../utils/trigger-helpers';
-import { parseArgs, getMissingKeys } from '../../utils/parse-args';
+import { parseArgs, findMissingKeys } from '../../utils/parse-args';
 import { DiscordUser } from '../../typings';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(relativeTime);
 dayjs.extend(utc);
 
-type InputArgs = {
+type Args = {
     title?: string;
     description?: string;
     color?: string;
@@ -31,25 +32,45 @@ type InputArgs = {
 type EventTime = {
     startHours: string;
     endHours: string;
-    durationString: string;
+    duration: string;
 };
 
 type Duration = [number, UnitType];
 
+type EventData = {
+    id: string;
+    title: string;
+    description: string;
+    startTime: string;
+    endTime: string;
+    authorId: string;
+    color: string;
+    guildId: string;
+    channelId: string;
+    messageId: string;
+    url: string;
+    body: string;
+    participants: DiscordUser[];
+};
+
 const requiredRole = 'Raider all';
 const timestampFormat = 'YYYY-MM-DDTHH:mmZ';
-const requiredInputArgs = ['title', 'start', 'duration'];
+const requiredArgs = ['title', 'start', 'duration'];
+const defaultArgs: Args = {
+    color: '#000000',
+    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+};
 
-const getDurationAdditions = (duration): Duration[] => {
-    let additionsParams = duration.split(' ');
+const getDurationAdditions = (duration: string): Duration[] => {
+    let additionParams = duration.split(' ');
     let output: Duration[] = [];
 
-    additionsParams.forEach((param: string) => {
+    additionParams.forEach((param: string) => {
         const indexOfFirstChar: number = param.indexOfRegex(/[a-zA-Z]/);
-        const durationTime: number = parseInt(param.slice(0, indexOfFirstChar));
-        const durationType: UnitType = <UnitType>param.slice(indexOfFirstChar);
+        const time: number = parseInt(param.slice(0, indexOfFirstChar));
+        const type: UnitType = <UnitType>param.slice(indexOfFirstChar);
 
-        output.push([durationTime, durationType]);
+        output.push([time, type]);
     });
 
     return output;
@@ -57,87 +78,110 @@ const getDurationAdditions = (duration): Duration[] => {
 
 const calculateEndTime = (startTime: Dayjs, duration: string): Dayjs => {
     const additions: Duration[] = getDurationAdditions(duration);
-    additions.forEach(time => (startTime = startTime.add(time[0], time[1])));
-    return startTime.utc();
+
+    additions.forEach(time => {
+        startTime = startTime.add(time[0], time[1]);
+    });
+
+    return startTime;
 };
 
 const dayjsToTimezone = (date: Dayjs): Dayjs => {
     // TODO: improve timezone output
-    // add 2 hours because the timestamp is parsed to utc and Europe/Berlin is +2
+    // Add 2 hours because the timestamp is parsed to utc and Europe/Berlin is +2
     return date.add(2, 'hour');
 };
 
 const getEventTime = (start: Dayjs, end: Dayjs): EventTime => {
     const diffInHours = end.diff(start, 'hour');
     const diffInMinutes = end.subtract(diffInHours, 'hour').diff(start, 'minute');
-
     const hours = diffInHours ? `${diffInHours} hours` : null;
     const minutes = diffInMinutes ? `${diffInMinutes} minutes` : null;
-    const durationString = [hours, minutes].join(' ').trim();
 
     return {
         startHours: dayjsToTimezone(start).format('HH:mm'),
         endHours: dayjsToTimezone(end).format('HH:mm'),
-        durationString
+        duration: [hours, minutes].join(' ').trim()
     };
 };
 
-const getDescription = (start: Dayjs, durationArg: string, description: string): string => {
-    const end: Dayjs = calculateEndTime(start, durationArg);
+const getDescription = (start: Dayjs, end: Dayjs, description: string): string => {
+    const { startHours, endHours, duration } = getEventTime(start, end);
     const startTime: string = start.format('dddd DD/MM');
-    const { startHours, endHours, durationString } = getEventTime(start, end);
     const descriptionText = description ? `\n\n${description}` : '';
-    return `${startTime} from ${startHours} to ${endHours} server time (${durationString})${descriptionText}`;
+    return `${startTime} from ${startHours} to ${endHours} server time (${duration})${descriptionText}`;
 };
 
-const formatFieldData = (users: DiscordUser[]): string =>
-    users.length > 0 ? users.map(member => member.ping).join('\n') : '—';
+const formatFieldData = (users: DiscordUser[]): string => {
+    if (users.length < 1) return '—';
+    return users.map(member => member.ping).join('\n');
+};
 
 const isHexColorFormat = (hex: string): boolean => /^#[0-9A-F]{3,6}$/i.test(hex);
+
+const isValidTimestampFormat = (date: string): boolean => dayjs(date, timestampFormat).isValid();
+
+const createEventData = (args: Args, message: Message): EventData => {
+    const { title, description, duration, url, color, start } = args;
+    const { member, guild, channel } = message;
+
+    // Use utc because dayjs doesn't have output timezone, we make the output to be GMT+2
+    // by adding 2 hours to UTC
+    const startTime: Dayjs = dayjs(start, timestampFormat).utc();
+    const endTime: Dayjs = calculateEndTime(startTime, duration).utc();
+    const body: string = getDescription(startTime, endTime, description);
+    const participants: DiscordUser[] = getDiscordUsersWithRoleSorted(<TextChannel>channel, requiredRole);
+
+    return {
+        id: '#1',
+        title,
+        description,
+        startTime: startTime.format(timestampFormat),
+        endTime: endTime.format(timestampFormat),
+        authorId: member.id,
+        color,
+        guildId: guild.id,
+        channelId: channel.id,
+        messageId: message.id,
+        url,
+        body,
+        participants
+    };
+};
 
 export default createMessageTrigger({
     name: 'addEvent',
     trigger: new RegExp(/^!add-event\b/),
     execute: (message: Message) => {
         try {
-            const defaults: InputArgs = {
-                color: '#000000',
-                url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
-            };
             const { content, channel } = message;
             // Remove the command part, .e.g '!add', from beginning of the message
-            const inputArgs = content.slice(this.default.trigger.length, content.length);
-            const args = parseArgs(inputArgs, defaults);
-            const missingKeys = getMissingKeys(requiredInputArgs, args);
+            const input: string = content.slice(this.default.trigger.length, content.length);
+            const args: Args = parseArgs(input, defaultArgs);
+            const missingKeys: string[] = findMissingKeys(requiredArgs, args);
 
             if (missingKeys.length > 0) {
                 throw `Missing following arguments: ${missingKeys.join(', ')}`;
             }
 
-            const { title, description, duration, url, color, start } = args;
-
-            if (!isHexColorFormat(color)) {
-                throw 'Invalid color format, should be hex value with 6 digits. E.g. #ff000.';
-            }
-
-            console.log(color);
-            const startTimeDate: Dayjs = dayjs(start, timestampFormat).utc();
-
-            if (!startTimeDate.isValid()) {
+            if (!isValidTimestampFormat(args.start)) {
                 throw `Invalid start time format, should be ${timestampFormat}`;
             }
 
-            const body: string = getDescription(startTimeDate, duration, description);
-            const participants: DiscordUser[] = getDiscordUsersWithRoleSorted(<TextChannel>channel, requiredRole);
+            if (!isHexColorFormat(args.color)) {
+                throw 'Invalid color format, should be hex value with 6 digits. E.g. #ff000.';
+            }
+
+            const { id, color, title, url, body, participants } = createEventData(args, message);
 
             const embed: RichEmbed = new RichEmbed()
                 .setColor(color)
                 .setTitle(title)
                 .setURL(url)
-                .setAuthor('#1' /*, 'https://i.imgur.com/wSTFkRM.png'*/)
+                .setAuthor(id /*, 'https://i.imgur.com/wSTFkRM.png'*/)
                 .setDescription(body)
                 .addBlankField()
-                .addField(`Accepted (0})`, '—', true)
+                .addField(`Accepted (0)`, '—', true)
                 .addField(`Declined (0)`, '—', true)
                 .addBlankField()
                 .addField(`Not set (${participants.length})`, formatFieldData(participants))

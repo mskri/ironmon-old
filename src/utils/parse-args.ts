@@ -76,7 +76,7 @@ export const parseArgs = <T>(input: string, defaults: T): T => {
     return Object.assign(defaults, props);
 };
 
-export const getMissingKeys = (requiredKeys: string[], args: object = {}): string[] => {
+export const findMissingKeys = (requiredKeys: string[], args: object = {}): string[] => {
     let missingKeys: string[] = [];
 
     requiredKeys.forEach((key: string) => {
