@@ -5,14 +5,11 @@ import * as utc from 'dayjs/plugin/utc';
 import { Dayjs, UnitType } from 'dayjs';
 import { Message, RichEmbed, TextChannel, Channel } from 'discord.js';
 import { createMessageTrigger } from '../../triggers/factory';
-import {
-    sendToChannelwithReactions,
-    sendErrorToChannel,
-    getDiscordUsersWithRoleSorted,
-    getDiscordUser
-} from '../../triggers/helpers';
+import { sendToChannelwithReactions, sendErrorToChannel, getDiscordUsersWithRoleSorted } from '../../triggers/helpers';
 import { parseArgs, findMissingKeys } from '../../utils/parse-args';
 import { DiscordUser } from '../../typings';
+import apolloClient from '../../apollo';
+import gql from 'graphql-tag';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(relativeTime);
@@ -29,13 +26,13 @@ type Args = {
     url?: string;
 };
 
+type Duration = [number, UnitType];
+
 type EventTime = {
     startHours: string;
     endHours: string;
     duration: string;
 };
-
-type Duration = [number, UnitType];
 
 type EventData = {
     id: string;
@@ -54,8 +51,8 @@ type EventData = {
 };
 
 const requiredRole = 'Raider all';
-const timestampFormat = 'YYYY-MM-DDTHH:mmZ';
 const requiredArgs = ['title', 'start', 'duration'];
+const timestampFormat = 'YYYY-MM-DDTHH:mmZ';
 const defaultArgs: Args = {
     color: '#000000',
     url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
@@ -121,9 +118,26 @@ const isHexColorFormat = (hex: string): boolean => /^#[0-9A-F]{3,6}$/i.test(hex)
 
 const isValidTimestampFormat = (date: string): boolean => dayjs(date, timestampFormat).isValid();
 
-const createEventData = (args: Args, message: Message): EventData => {
+const createEventData = async (args: Args, message: Message): Promise<EventData> => {
     const { title, description, duration, url, color, start } = args;
     const { member, guild, channel } = message;
+
+    const id = await apolloClient
+        .query({
+            query: gql`
+                query {
+                    allEvents(last: 1) {
+                        nodes {
+                            rowId
+                        }
+                    }
+                }
+            `
+        })
+        .then(result => {
+            const rowId = result.data.allEvents.nodes[0].rowId;
+            return `#${rowId}`;
+        });
 
     // Use utc because dayjs doesn't have output timezone, we make the output to be GMT+2
     // by adding 2 hours to UTC
@@ -133,7 +147,7 @@ const createEventData = (args: Args, message: Message): EventData => {
     const participants: DiscordUser[] = getDiscordUsersWithRoleSorted(<TextChannel>channel, requiredRole);
 
     return {
-        id: '#1',
+        id,
         title,
         description,
         startTime: startTime.format(timestampFormat),
@@ -149,10 +163,73 @@ const createEventData = (args: Args, message: Message): EventData => {
     };
 };
 
+const createEmbed = (eventData: EventData): RichEmbed => {
+    const { id, color, title, url, body, participants } = eventData;
+
+    return new RichEmbed()
+        .setColor(color)
+        .setTitle(title)
+        .setURL(url)
+        .setAuthor(id /*, 'https://i.imgur.com/wSTFkRM.png'*/)
+        .setDescription(body)
+        .addBlankField()
+        .addField(`Accepted (0)`, '—', true)
+        .addField(`Declined (0)`, '—', true)
+        .addBlankField()
+        .addField(`Not set (${participants.length})`, formatFieldData(participants))
+        .addBlankField()
+        .setTimestamp()
+        .setFooter('Set your status by reacting with the emojis below');
+};
+
+const storeEvent = (eventData: EventData): void => {
+    apolloClient
+        .mutate({
+            variables: eventData,
+            mutation: gql`
+                mutation(
+                    $title: String
+                    $description: String
+                    $startTime: Datetime
+                    $endTime: Datetime
+                    $authorId: String
+                    $guildId: String
+                    $channelId: String
+                    $messageId: String
+                    $color: String
+                    $url: String
+                ) {
+                    createEvent(
+                        input: {
+                            event: {
+                                title: $title
+                                description: $description
+                                startTime: $startTime
+                                endTime: $endTime
+                                authorId: $authorId
+                                guildId: $guildId
+                                channelId: $channelId
+                                messageId: $messageId
+                                color: $color
+                                url: $url
+                            }
+                        }
+                    ) {
+                        event {
+                            rowId
+                        }
+                    }
+                }
+            `
+        })
+        .then(_ => console.log(`${this.default.name} | Stored event ${eventData.id} to database`))
+        .catch(error => console.log(error));
+};
+
 export default createMessageTrigger({
     name: 'addEvent',
     trigger: new RegExp(/^!add-event\b/),
-    execute: (message: Message) => {
+    execute: async (message: Message) => {
         try {
             const { content, channel } = message;
             // Remove the command part, .e.g '!add', from beginning of the message
@@ -172,25 +249,13 @@ export default createMessageTrigger({
                 throw 'Invalid color format, should be hex value with 6 digits. E.g. #ff000.';
             }
 
-            const { id, color, title, url, body, participants } = createEventData(args, message);
-
-            const embed: RichEmbed = new RichEmbed()
-                .setColor(color)
-                .setTitle(title)
-                .setURL(url)
-                .setAuthor(id /*, 'https://i.imgur.com/wSTFkRM.png'*/)
-                .setDescription(body)
-                .addBlankField()
-                .addField(`Accepted (0)`, '—', true)
-                .addField(`Declined (0)`, '—', true)
-                .addBlankField()
-                .addField(`Not set (${participants.length})`, formatFieldData(participants))
-                .addBlankField()
-                .setTimestamp()
-                .setFooter('Set your status by reacting with the emojis below');
-
+            const eventData = await createEventData(args, message);
+            const embed = createEmbed(eventData);
             const reactions = ['481485649732698124', '481485635836837888'];
-            sendToChannelwithReactions(channel, embed, reactions);
+
+            sendToChannelwithReactions(channel, embed, reactions).then(_ => {
+                storeEvent(eventData);
+            });
         } catch (error) {
             console.error(`${this.default.name} | ${error}`);
             sendErrorToChannel(message.channel, error);

@@ -29,15 +29,16 @@ export const sendToChannelwithReactions = (
     channel: TextChannel | DMChannel | GroupDMChannel,
     message: string | RichEmbed,
     reactions: string[]
-): void => {
-    channel
-        .send(message)
-        .then(async (message: Message) => {
+): Promise<void | Message> => {
+    try {
+        return channel.send(message).then(async (message: Message) => {
             for (const emoji of reactions) {
                 await message.react(emoji);
             }
-        })
-        .catch(error => console.error(error));
+        });
+    } catch (error) {
+        console.log(error);
+    }
 };
 
 export const sendErrorToChannel = (channel: TextChannel | DMChannel | GroupDMChannel, error: string): void => {
