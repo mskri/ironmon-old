@@ -101,8 +101,7 @@ const getDescription = (start: Dayjs, durationArg: string, description: string):
 const formatFieldData = (users: DiscordUser[]): string =>
     users.length > 0 ? users.map(member => member.ping).join('\n') : '*—*';
 
-// TODO: should allow #fff too ?
-const isValidHexColor = (hex: string): boolean => /^#[0-9A-F]{6}$/i.test(hex);
+const isHexColorFormat = (hex: string): boolean => /^#[0-9A-F]{3,6}$/i.test(hex);
 
 export default createMessageTrigger({
     name: 'addEvent',
@@ -124,7 +123,7 @@ export default createMessageTrigger({
 
             const { title, description, duration, url, color, start } = args;
 
-            if (!isValidHexColor(color)) {
+            if (!isHexColorFormat(color)) {
                 throw 'Invalid color format, should be hex value with 6 digits. E.g. #ff000.';
             }
 
