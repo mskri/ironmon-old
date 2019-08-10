@@ -1,3 +1,9 @@
+declare global {
+    interface String {
+        indexOfRegex(regexp: RegExp): number;
+    }
+}
+
 String.prototype.indexOfRegex = function(regex: RegExp) {
     const match = this.match(regex);
     return match ? this.indexOf(match[0]) : -1;
