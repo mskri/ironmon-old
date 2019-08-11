@@ -1,6 +1,6 @@
 import { Message, TextChannel } from 'discord.js';
-import { createMessageTrigger } from '../../triggers/factory';
-import { sendToChannel } from '../../triggers/helpers';
+import { createMessageTrigger } from '../factory';
+import { sendToChannel } from '../helpers';
 
 export default createMessageTrigger({
     name: 'getEmojiId',

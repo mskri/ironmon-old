@@ -3,8 +3,7 @@ import { TriggerPermissions, ReactionEvent } from './typings';
 import { createMessageTriggerEvent, createReactionTriggerEvent } from './triggers/factory';
 import { allowedReactionEvents, messageTriggerQueue, reactionTriggerQueue } from './triggers/queue';
 import { matchesTrigger, matchesReaction } from './triggers/helpers';
-import messageTriggers from './message-triggers';
-import reactionTriggers from './reaction-triggers';
+import { messageTriggers, reactionTriggers } from './triggers';
 
 import preventDM from './utils/prevent-dm';
 import triggerPermissions from './configs/trigger-permissions';

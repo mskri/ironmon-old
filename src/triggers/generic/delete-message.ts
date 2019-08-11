@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import { ReactionEvent } from '../../typings';
-import { createReactionTrigger } from '../../triggers/factory';
+import { createReactionTrigger } from '../factory';
 
 export default createReactionTrigger({
     name: 'deleteMessageReaction',

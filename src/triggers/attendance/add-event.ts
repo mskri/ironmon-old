@@ -5,13 +5,13 @@ import * as utc from 'dayjs/plugin/utc';
 import { Args, Duration, DiscordUser, EventData, EventMeta, EventTime } from '../../typings';
 import { Dayjs, UnitType } from 'dayjs';
 import { Message, TextChannel, RichEmbed } from 'discord.js';
-import { createMessageTrigger } from '../../triggers/factory';
+import { createMessageTrigger } from '../factory';
 import {
     sendToChannelwithReactions,
     sendErrorToChannel,
     getDiscordUsersWithRoleSorted,
     getDiscordUser
-} from '../../triggers/helpers';
+} from '../helpers';
 import { parseArgs, findMissingKeys } from '../../utils/parse-args';
 import { isHexColorFormat } from '../../utils/validators';
 import { timestampFormat } from '../../configs/constants';
@@ -91,16 +91,14 @@ const getDescription = (timestamp: EventTime, description: string): string => {
 
 const createEventMeta = (message: Message): EventMeta => {
     const { member, guild, channel } = message;
-    const authorId: string = member.id;
+    const userId: string = member.id;
     const guildId: string = guild.id;
     const channelId: string = channel.id;
-    const messageId: string = message.id;
 
     return {
-        authorId,
+        userId,
         guildId,
-        channelId,
-        messageId
+        channelId
     };
 };
 
@@ -217,8 +215,8 @@ export default createMessageTrigger({
                 await saveUser(discordUser);
             }
 
-            sendToChannelwithReactions(channel, embed, reactionstoAdd).then(_ => {
-                saveEvent(eventData, eventMeta);
+            sendToChannelwithReactions(channel, embed, reactionstoAdd).then(message => {
+                saveEvent(eventData, eventMeta, message.id);
                 // TODO: what to do if saveEvent fails? Should edit the posted event to say "Error saving event to database" or something?
             });
         } catch (error) {
