@@ -82,8 +82,14 @@ export function getUsersWithRole(members: GuildMember[], withRole: string) {
     });
 }
 
+export const getGuildMembersWithRoleSorted = (channel: TextChannel, requiredRoleName: string): GuildMember[] => {
+    return getUsersWithRole(channel.members.array(), requiredRoleName).sort(
+        (a: any, b: any) => a.username - b.username
+    );
+};
+
 export const getDiscordUsersWithRoleSorted = (channel: TextChannel, requiredRoleName: string): DiscordUser[] => {
-    const membersSorted = getUsersWithRole(channel.members.array(), requiredRoleName).sort(
+    const membersSorted: GuildMember[] = getUsersWithRole(channel.members.array(), requiredRoleName).sort(
         (a: any, b: any) => a.username - b.username
     );
 

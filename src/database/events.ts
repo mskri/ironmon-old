@@ -5,8 +5,8 @@ import { Message } from 'discord.js';
 
 const TAG = 'database/events';
 
-export const saveEvent = (eventData: EventData, eventMeta: EventMeta): void => {
-    const variables = Object.assign(eventData, eventMeta);
+export const saveEvent = (eventData: EventData, eventMeta: EventMeta, messageId: string): void => {
+    const variables = Object.assign(eventData, eventMeta, { messageId });
 
     apolloClient
         .mutate({
@@ -17,7 +17,7 @@ export const saveEvent = (eventData: EventData, eventMeta: EventMeta): void => {
                     $description: String
                     $startTime: Datetime
                     $endTime: Datetime
-                    $authorId: String
+                    $userId: String
                     $guildId: String
                     $channelId: String
                     $messageId: String
@@ -31,7 +31,7 @@ export const saveEvent = (eventData: EventData, eventMeta: EventMeta): void => {
                                 description: $description
                                 startTime: $startTime
                                 endTime: $endTime
-                                authorId: $authorId
+                                userId: $userId
                                 guildId: $guildId
                                 channelId: $channelId
                                 messageId: $messageId
@@ -55,6 +55,8 @@ export const saveEvent = (eventData: EventData, eventMeta: EventMeta): void => {
 };
 
 export const getEventByMessageId = async (messageId: string): Promise<EventData | null> => {
+    console.log(`${TAG} | Fetch event by messageId ${messageId}`);
+
     return await apolloClient
         .query({
             variables: { messageId },
@@ -66,7 +68,7 @@ export const getEventByMessageId = async (messageId: string): Promise<EventData 
                         description
                         startTime
                         endTime
-                        authorId
+                        userId
                         guildId
                         channelId
                         color
@@ -76,9 +78,27 @@ export const getEventByMessageId = async (messageId: string): Promise<EventData 
             `
         })
         .then(result => {
-            return result.data.eventByMessageId;
+            const data = result.data.eventByMessageId;
+
+            if (data == null) throw `Event with messageId ${messageId} not found`;
+
+            const { rowId, title, description, startTime, endTime, color, url } = data;
+            console.log(`${TAG} | Received event ${rowId} with messageId ${messageId}`);
+
+            return {
+                rowId,
+                title,
+                description,
+                startTime,
+                endTime,
+                color,
+                url
+            };
         })
-        .catch(error => console.error(`${TAG} | ${error}`));
+        .catch(error => {
+            console.error(`${TAG} | ${error}`);
+            return null;
+        });
 };
 
 export const getLastEventId = async (): Promise<number> => {

@@ -1,4 +1,4 @@
-import { Message, User, MessageReaction, Client, GuildMember } from 'discord.js';
+import { Message, User, MessageReaction, Client, GuildMember, Emoji } from 'discord.js';
 import { Dayjs, UnitType } from 'dayjs';
 
 export type MessageTriggerEvent = {
@@ -53,6 +53,7 @@ export type ReactionEvent = {
     type: string;
     reaction: MessageReaction;
     author: GuildMember;
+    emojiName: string;
 };
 
 export type ReactionTriggerEvent = {
@@ -123,10 +124,16 @@ export type EventData = {
 };
 
 export type EventMeta = {
-    authorId: string;
+    userId: string;
     guildId: string;
     channelId: string;
-    messageId: string;
 };
 
 type SignupStatus = 'accepted' | 'declined';
+
+type Signup = {
+    rowId: number;
+    status: SignupStatus;
+    eventId: string;
+    userId: string;
+};

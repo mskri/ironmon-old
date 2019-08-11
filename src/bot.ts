@@ -82,7 +82,8 @@ export const onRaw = async (client: Client, event: any) => {
     const reactionEvent: ReactionEvent = {
         type: event.t,
         reaction,
-        author: member
+        author: member,
+        emojiName: data.emoji.name
     };
 
     const permissions = findTriggerPermissions(message.guild.id, trigger.name);
