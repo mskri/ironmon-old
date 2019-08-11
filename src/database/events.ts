@@ -1,12 +1,11 @@
-import { EventData, EventMeta } from '../typings';
+import { AttendanceEvent } from '../typings';
 import apolloClient from '../apollo';
 import gql from 'graphql-tag';
-import { Message } from 'discord.js';
 
 const TAG = 'database/events';
 
-export const saveEvent = (eventData: EventData, eventMeta: EventMeta, messageId: string): void => {
-    const variables = Object.assign(eventData, eventMeta, { messageId });
+export const saveEvent = (event: AttendanceEvent, messageId: string): void => {
+    const variables = Object.assign(event, { messageId });
 
     apolloClient
         .mutate({
@@ -54,7 +53,7 @@ export const saveEvent = (eventData: EventData, eventMeta: EventMeta, messageId:
         .catch(error => console.error(error));
 };
 
-export const getEventByMessageId = async (messageId: string): Promise<EventData | null> => {
+export const getEventByMessageId = async (messageId: string): Promise<AttendanceEvent | void> => {
     console.log(`${TAG} | Fetch event by messageId ${messageId}`);
 
     return await apolloClient
@@ -82,15 +81,18 @@ export const getEventByMessageId = async (messageId: string): Promise<EventData 
 
             if (data == null) throw `Event with messageId ${messageId} not found`;
 
-            const { rowId, title, description, startTime, endTime, color, url } = data;
+            const { rowId, title, description, startTime, endTime, userId, guildId, channelId, color, url } = data;
             console.log(`${TAG} | Received event ${rowId} with messageId ${messageId}`);
 
-            return {
+            return <AttendanceEvent>{
                 rowId,
                 title,
                 description,
                 startTime,
                 endTime,
+                userId,
+                guildId,
+                channelId,
                 color,
                 url
             };

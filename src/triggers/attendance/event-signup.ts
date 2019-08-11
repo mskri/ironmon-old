@@ -22,7 +22,7 @@ export default createReactionTrigger({
 
         const status: SignupStatus = emojiName === 'accepted' ? 'accepted' : 'declined';
         // const eventData: EventData = await getEventByMessageId(reaction.message.id);
-        const members: GuildMember[] = getGuildMembersWithRoleSorted(<TextChannel>channel, requiredRole);
+        // const members: GuildMember[] = getGuildMembersWithRoleSorted(<TextChannel>channel, requiredRole);
         // console.log(members);
 
         const signup: Signup = await getSignup(author.id, reaction.message.id);

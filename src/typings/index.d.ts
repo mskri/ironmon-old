@@ -96,7 +96,7 @@ export type Reaction = {
 
 export type Args = {
     title?: string;
-    description?: string;
+    details?: string;
     color?: string;
     start?: Dayjs;
     duration?: string;
@@ -106,27 +106,25 @@ export type Args = {
 
 export type Duration = [number, UnitType];
 
-export type EventTime = {
-    startTime: string;
-    startHours: string;
-    endHours: string;
-    duration: string;
-};
-
-export type EventData = {
+type AttendanceEvent = {
     rowId: number;
     title: string;
     description: string;
-    startTime: Dayjs;
-    endTime: Dayjs;
+    startTime: string;
+    endTime: string;
     color: string;
     url: string;
-};
-
-export type EventMeta = {
     userId: string;
     guildId: string;
     channelId: string;
+    duration?: string;
+};
+
+type AttendanceEventEmbed = {
+    event: AttendanceEvent;
+    noStatusUsers: DiscordUser[];
+    acceptedUsers: DiscordUser[];
+    declinedUsers: DiscordUser[];
 };
 
 type SignupStatus = 'accepted' | 'declined';
