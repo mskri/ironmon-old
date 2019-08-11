@@ -128,3 +128,5 @@ export type EventMeta = {
     channelId: string;
     messageId: string;
 };
+
+type SignupStatus = 'accepted' | 'declined';
