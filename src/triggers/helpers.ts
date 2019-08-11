@@ -5,9 +5,9 @@ import {
     GroupDMChannel,
     GuildMember,
     RichEmbed,
-    Permissions,
     ReactionEmoji,
-    Emoji
+    Emoji,
+    PermissionString
 } from 'discord.js';
 import { DiscordUser, TriggerConfig } from '../typings';
 
@@ -114,23 +114,28 @@ export const authorHasPermissionFlags = (config: TriggerConfig): boolean => {
     const user = getDiscordUser(author);
 
     if (permissionFlags && permissionFlags.length > 0) {
-        let requiredPermissions = [];
-
-        permissionFlags.forEach(flag => {
-            const permissionFlag = Permissions.FLAGS[flag];
-            if (permissionFlag) requiredPermissions.push(permissionFlag);
-        });
-
-        const hasRequiredPermissions = message.member.hasPermission([requiredPermissions]);
-
-        if (hasRequiredPermissions) {
-            console.log(`${trigger.name} | ${user.full} has required permission flags (${permissionFlags.join(', ')})`);
-        } else {
-            console.error(
-                `${trigger.name} | ${user.full} does not have required permission flags (${permissionFlags.join(', ')})`
+        try {
+            const hasAllRequiredPermissions = permissionFlags.every((flag: PermissionString) =>
+                author.hasPermission(flag)
             );
+
+            if (hasAllRequiredPermissions) {
+                console.log(
+                    `${trigger.name} | ${user.full} has required permission flags (${permissionFlags.join(', ')})`
+                );
+            } else {
+                console.error(
+                    `${trigger.name} | ${user.full} does not have required permission flags (${permissionFlags.join(
+                        ', '
+                    )})`
+                );
+            }
+
+            return hasAllRequiredPermissions;
+        } catch (error) {
+            console.error(`${trigger.name} | Unrecognized permission(s): ${permissionFlags.join(', ')}`);
+            return false;
         }
-        return hasRequiredPermissions;
     }
 
     return true;
