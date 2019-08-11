@@ -1,4 +1,5 @@
 import { Message, User, MessageReaction, Client, GuildMember } from 'discord.js';
+import { Dayjs, UnitType } from 'dayjs';
 
 export type MessageTriggerEvent = {
     logInit(): void;
@@ -70,10 +71,19 @@ export type ReactionTriggerEvent = {
 
 export type DiscordUser = {
     id: string;
+    nickname: string;
     username: string;
     discriminator: string;
     full: string;
     ping: string;
+};
+
+// TODO: combine all different user types (e.g. DiscordUser) into a single user type with optional fields (e.g. full and ping)
+type DbUser = {
+    id: string;
+    username: string;
+    discordUsername: string;
+    discordDiscriminator: string;
 };
 
 export type Reaction = {
@@ -81,4 +91,40 @@ export type Reaction = {
     name: string;
     category: string;
     color: number;
+};
+
+export type Args = {
+    title?: string;
+    description?: string;
+    color?: string;
+    start?: Dayjs;
+    duration?: string;
+    users?: boolean;
+    url?: string;
+};
+
+export type Duration = [number, UnitType];
+
+export type EventTime = {
+    startTime: string;
+    startHours: string;
+    endHours: string;
+    duration: string;
+};
+
+export type EventData = {
+    rowId: number;
+    title: string;
+    description: string;
+    startTime: Dayjs;
+    endTime: Dayjs;
+    color: string;
+    url: string;
+};
+
+export type EventMeta = {
+    authorId: string;
+    guildId: string;
+    channelId: string;
+    messageId: string;
 };

@@ -55,14 +55,18 @@ export const getDiscordUser = (member: GuildMember): DiscordUser => {
         return;
     }
 
-    const username = member.nickname ? member.nickname : member.user.username;
+    const { id, username, discriminator } = member.user;
+    const nickname = member.nickname ? member.nickname : username;
+    const full = `${username}#${discriminator}/${id}`;
+    const ping = `<@${id}>`;
 
     return {
-        id: member.user.id,
-        username: username,
-        discriminator: member.user.discriminator,
-        full: `${member.user.username}#${member.user.discriminator}/${member.id}`,
-        ping: `<@${member.user.id}>`
+        id,
+        username,
+        discriminator,
+        nickname,
+        full,
+        ping
     };
 };
 
@@ -106,8 +110,8 @@ export const logInit = (config: TriggerConfig): void => {
 export const authorHasPermissionFlags = (config: TriggerConfig): boolean => {
     const { permissions, message, trigger, reactionEvent } = config;
     const { permissionFlags } = permissions;
-    const member = reactionEvent ? reactionEvent.author : message.member;
-    const user = getDiscordUser(member);
+    const author = reactionEvent ? reactionEvent.author : message.member;
+    const user = getDiscordUser(author);
 
     if (permissionFlags && permissionFlags.length > 0) {
         let requiredPermissions = [];

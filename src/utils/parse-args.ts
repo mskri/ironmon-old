@@ -1,3 +1,7 @@
+import * as dayjs from 'dayjs';
+import { Dayjs } from 'dayjs';
+import { timestampFormat } from '../configs/constants';
+
 declare global {
     interface String {
         indexOfRegex(regexp: RegExp): number;
@@ -10,13 +14,15 @@ String.prototype.indexOfRegex = function(regex: RegExp) {
 };
 
 // Converts the value to boolean/number if they can be otherwise returns them as string
-const convertIfApplicable = (value: any): string | number | boolean => {
+const convertIfApplicable = (value: any): string | number | boolean | Dayjs => {
     if (isNaN(value)) {
-        const isBooleanTrue = value.toString().toLowerCase() === 'true';
-        const isBooleanFalse = value.toString().toLowerCase() === 'false';
+        const isBooleanTrue = value.toLowerCase() === 'true';
+        const isBooleanFalse = value.toLowerCase() === 'false';
+        const isDate = dayjs(value, timestampFormat).isValid();
 
         if (isBooleanTrue) return true;
         if (isBooleanFalse) return false;
+        if (isDate) return dayjs(value, timestampFormat).utc();
     } else {
         return Number(value);
     }

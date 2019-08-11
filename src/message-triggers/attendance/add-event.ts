@@ -2,51 +2,25 @@ import * as dayjs from 'dayjs';
 import * as customParseFormat from 'dayjs/plugin/customParseFormat';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
 import * as utc from 'dayjs/plugin/utc';
+import { Args, Duration, DiscordUser, EventData, EventMeta, EventTime } from '../../typings';
 import { Dayjs, UnitType } from 'dayjs';
-import { Message, RichEmbed, TextChannel } from 'discord.js';
+import { Message, TextChannel, RichEmbed } from 'discord.js';
 import { createMessageTrigger } from '../../triggers/factory';
-import { sendToChannelwithReactions, sendErrorToChannel, getDiscordUsersWithRoleSorted } from '../../triggers/helpers';
+import {
+    sendToChannelwithReactions,
+    sendErrorToChannel,
+    getDiscordUsersWithRoleSorted,
+    getDiscordUser
+} from '../../triggers/helpers';
 import { parseArgs, findMissingKeys } from '../../utils/parse-args';
-import { DiscordUser } from '../../typings';
-import { isHexColorFormat, isValidTimestampFormat } from '../../utils/validators';
+import { isHexColorFormat } from '../../utils/validators';
 import { timestampFormat } from '../../configs/constants';
-import apolloClient from '../../apollo';
-import gql from 'graphql-tag';
+import { saveUser, getUser } from '../../database/users';
+import { saveEvent, getLastEventId } from '../../database/events';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(relativeTime);
 dayjs.extend(utc);
-
-type Args = {
-    title?: string;
-    description?: string;
-    color?: string;
-    start?: string;
-    end?: string;
-    duration?: string;
-    users?: boolean;
-    url?: string;
-};
-
-type Duration = [number, UnitType];
-
-type EventTime = {
-    startHours: string;
-    endHours: string;
-    duration: string;
-};
-
-export type EventData = {
-    rowId: string;
-    title: string;
-    description: string;
-    startTime: string;
-    endTime: string;
-    color: string;
-    url: string;
-    body: string;
-    participants: DiscordUser[];
-};
 
 const requiredRole = 'Raider all';
 const requiredArgs = ['title', 'start', 'duration'];
@@ -86,60 +60,61 @@ const dayjsToTimezone = (date: Dayjs): Dayjs => {
     return date.add(2, 'hour');
 };
 
-const getEventTime = (start: Dayjs, end: Dayjs): EventTime => {
-    const diffInHours = end.diff(start, 'hour');
-    const diffInMinutes = end.subtract(diffInHours, 'hour').diff(start, 'minute');
-    const hours = diffInHours ? `${diffInHours} hours` : null;
-    const minutes = diffInMinutes ? `${diffInMinutes} minutes` : null;
-
-    return {
-        startHours: dayjsToTimezone(start).format('HH:mm'),
-        endHours: dayjsToTimezone(end).format('HH:mm'),
-        duration: [hours, minutes].join(' ').trim()
-    };
-};
-
-const getDescription = (start: Dayjs, end: Dayjs, description: string): string => {
-    const { startHours, endHours, duration } = getEventTime(start, end);
-    const startTime: string = start.format('dddd DD/MM');
-    const descriptionText = description ? `\n\n${description}` : '';
-    return `${startTime} from ${startHours} to ${endHours} server time (${duration})${descriptionText}`;
-};
-
 const formatFieldData = (users: DiscordUser[]): string => {
     if (users.length < 1) return '—';
     return users.map(member => member.ping).join('\n');
 };
 
-const createEventData = async (args: Args, message: Message): Promise<EventData> => {
-    const { title, description, duration, url, color, start } = args;
-    const { channel } = message;
+const createEventTime = (start: Dayjs, duration: string): EventTime => {
+    // Use utc because dayjs doesn't have output timezone, we make the output to be GMT+2
+    // by adding 2 hours to UTC
 
-    const rowId = await apolloClient
-        .query({
-            query: gql`
-                query {
-                    allEvents(last: 1) {
-                        nodes {
-                            rowId
-                        }
-                    }
-                }
-            `
-        })
-        .then(result => {
-            const rowId = result.data.allEvents.nodes[0].rowId;
-            return rowId + 1;
-        });
+    const endTime: Dayjs = calculateEndTime(start, duration).utc();
+    const diffInHours = endTime.diff(start, 'hour');
+    const diffInMinutes = endTime.subtract(diffInHours, 'hour').diff(start, 'minute');
+    const hours = diffInHours ? `${diffInHours} hours` : null;
+    const minutes = diffInMinutes ? `${diffInMinutes} minutes` : null;
+
+    return {
+        startTime: dayjsToTimezone(start).format('dddd DD/MM'),
+        startHours: dayjsToTimezone(start).format('HH:mm'),
+        endHours: dayjsToTimezone(endTime).format('HH:mm'),
+        duration: [hours, minutes].join(' ').trim()
+    };
+};
+
+const getDescription = (timestamp: EventTime, description: string): string => {
+    const { startTime, startHours, endHours, duration } = timestamp;
+    const descriptionText = description ? `\n\n${description}` : '';
+    return `${startTime} from ${startHours} to ${endHours} server time (${duration})${descriptionText}`;
+};
+
+const createEventMeta = (message: Message): EventMeta => {
+    const { member, guild, channel } = message;
+    const authorId: string = member.id;
+    const guildId: string = guild.id;
+    const channelId: string = channel.id;
+    const messageId: string = message.id;
+
+    return {
+        authorId,
+        guildId,
+        channelId,
+        messageId
+    };
+};
+
+const createEventData = async (args: Args): Promise<EventData> => {
+    const { title, description, duration, url, color, start } = args;
+
+    const rowId: number = await getLastEventId();
 
     // Use utc because dayjs doesn't have output timezone, we make the output to be GMT+2
     // by adding 2 hours to UTC
-    const startDate: Dayjs = dayjs(start, timestampFormat).utc();
-    const startTime: string = startDate.format(timestampFormat);
-    const endDate: Dayjs = calculateEndTime(startDate, duration).utc();
-    const endTime: string = endDate.format(timestampFormat);
-    const body: string = getDescription(startDate, endDate, description);
-    const participants: DiscordUser[] = getDiscordUsersWithRoleSorted(<TextChannel>channel, requiredRole);
+    const startTime: Dayjs = dayjs(start, timestampFormat).utc();
+    // const startTime: string = startDate.format(timestampFormat);
+    // const endTime: string = endDate.format(timestampFormat);
+    const endTime: Dayjs = calculateEndTime(startTime, duration).utc();
 
     return {
         rowId,
@@ -148,89 +123,55 @@ const createEventData = async (args: Args, message: Message): Promise<EventData>
         startTime,
         endTime,
         color,
-        url,
-        body,
-        participants
+        url
     };
 };
 
-const createEmbed = (eventData: EventData): RichEmbed => {
-    const { rowId, color, title, url, body, participants } = eventData;
+const createEventEmbed = (eventData: EventData, description: string, participants: DiscordUser[]): RichEmbed => {
+    const { rowId, color, title, url } = eventData;
+    const colorInt: number = parseInt(color.replace('#', '0x'));
 
-    return new RichEmbed()
-        .setColor(color)
-        .setTitle(title)
-        .setURL(url)
-        .setAuthor(`#${rowId}` /*, 'https://i.imgur.com/wSTFkRM.png'*/)
-        .setDescription(body)
-        .addBlankField()
-        .addField(`Accepted (0)`, '—', true)
-        .addField(`Declined (0)`, '—', true)
-        .addBlankField()
-        .addField(`Not set (${participants.length})`, formatFieldData(participants))
-        .addBlankField()
-        .setTimestamp()
-        .setFooter('Set your status by reacting with the emojis below');
-};
+    const embed = {
+        color: colorInt,
+        title,
+        url,
+        author: {
+            name: `#${rowId}`
+        },
+        description,
+        fields: [
+            {
+                // Blank field for more visual space
+                name: '\u200b',
+                value: '\u200b'
+            },
+            {
+                name: `Accepted (0)`,
+                value: '—',
+                inline: true
+            },
+            {
+                name: `Declined (0)`,
+                value: '—',
+                inline: true
+            },
+            {
+                // Blank field for more visual space
+                name: '\u200b',
+                value: '\u200b'
+            },
+            {
+                name: `Not set (${participants.length})`,
+                value: formatFieldData(participants)
+            }
+        ],
+        timestamp: new Date(),
+        footer: {
+            text: 'Set your status by reacting with the emojis below'
+        }
+    };
 
-const storeEvent = (eventData: EventData, message: Message): void => {
-    const { member, guild, channel } = message;
-    const authorId: string = member.id;
-    const guildId: string = guild.id;
-    const channelId: string = channel.id;
-    const messageId: string = message.id;
-
-    const variables = Object.assign(eventData, {
-        authorId,
-        guildId,
-        channelId,
-        messageId
-    });
-
-    apolloClient
-        .mutate({
-            variables,
-            mutation: gql`
-                mutation(
-                    $title: String
-                    $description: String
-                    $startTime: Datetime
-                    $endTime: Datetime
-                    $authorId: String
-                    $guildId: String
-                    $channelId: String
-                    $messageId: String
-                    $color: String
-                    $url: String
-                ) {
-                    createEvent(
-                        input: {
-                            event: {
-                                title: $title
-                                description: $description
-                                startTime: $startTime
-                                endTime: $endTime
-                                authorId: $authorId
-                                guildId: $guildId
-                                channelId: $channelId
-                                messageId: $messageId
-                                color: $color
-                                url: $url
-                            }
-                        }
-                    ) {
-                        event {
-                            rowId
-                        }
-                    }
-                }
-            `
-        })
-        .then(result => {
-            const rowId = result.data.createEvent.event.rowId;
-            console.log(`${this.default.name} | Stored event to database with ID ${rowId}`);
-        })
-        .catch(error => console.log(error));
+    return new RichEmbed(embed);
 };
 
 export default createMessageTrigger({
@@ -238,7 +179,8 @@ export default createMessageTrigger({
     trigger: new RegExp(/^!add-event\b/),
     execute: async (message: Message) => {
         try {
-            const { content, channel } = message;
+            const { content, channel, member } = message;
+
             // Remove the command part, .e.g '!add', from beginning of the message
             const input: string = content.slice(this.default.trigger.length, content.length);
             const args: Args = parseArgs(input, defaultArgs);
@@ -248,7 +190,9 @@ export default createMessageTrigger({
                 throw `Missing following arguments: ${missingKeys.join(', ')}`;
             }
 
-            if (!isValidTimestampFormat(args.start)) {
+            const { start: startTime, duration, description } = args;
+
+            if (!startTime.isValid()) {
                 throw `Invalid start time format, should be ${timestampFormat}`;
             }
 
@@ -256,12 +200,26 @@ export default createMessageTrigger({
                 throw 'Invalid color format, should be hex value with 6 digits. E.g. #ff000.';
             }
 
-            const eventData = await createEventData(args, message);
-            const embed = createEmbed(eventData);
-            const reactions = ['481485649732698124', '481485635836837888'];
+            const eventData: EventData = await createEventData(args);
+            const eventMeta: EventMeta = createEventMeta(message);
+            const eventTime: EventTime = createEventTime(startTime, duration);
+            const body: string = getDescription(eventTime, description);
+            const participants: DiscordUser[] = getDiscordUsersWithRoleSorted(<TextChannel>channel, requiredRole);
+            const embed: RichEmbed = createEventEmbed(eventData, body, participants);
+            const reactionstoAdd = [
+                '481485649732698124', // :declined:
+                '481485635836837888' // :accepted:
+            ];
 
-            sendToChannelwithReactions(channel, embed, reactions).then(message => {
-                storeEvent(eventData, message);
+            const userData = await getUser(member.id);
+            if (!userData) {
+                const discordUser = getDiscordUser(member);
+                await saveUser(discordUser);
+            }
+
+            sendToChannelwithReactions(channel, embed, reactionstoAdd).then(_ => {
+                saveEvent(eventData, eventMeta);
+                // TODO: what to do if saveEvent fails? Should edit the posted event to say "Error saving event to database" or something?
             });
         } catch (error) {
             console.error(`${this.default.name} | ${error}`);
