@@ -4,11 +4,11 @@ import gql from 'graphql-tag';
 
 const TAG = 'database/events';
 
-export const saveEvent = (event: AttendanceEvent, messageId: string): void => {
+export const saveEvent = async (event: AttendanceEvent, messageId: string): Promise<number> => {
     const variables = Object.assign(event, { messageId });
 
-    apolloClient
-        .mutate({
+    try {
+        const result = await apolloClient.mutate({
             variables,
             mutation: gql`
                 mutation(
@@ -45,19 +45,19 @@ export const saveEvent = (event: AttendanceEvent, messageId: string): void => {
                     }
                 }
             `
-        })
-        .then(result => {
-            const rowId = result.data.createEvent.event.rowId;
-            console.log(`${TAG} | Saved event ${rowId}`);
-        })
-        .catch(error => console.error(error));
+        });
+
+        const rowId = result.data.createEvent.event.rowId;
+        return rowId;
+    } catch (error) {
+        console.error(`${TAG}/fetchEventByMessageId | ${error.message}`);
+        return null;
+    }
 };
 
-export const getEventByMessageId = async (messageId: string): Promise<AttendanceEvent | void> => {
-    console.log(`${TAG} | Fetch event by messageId ${messageId}`);
-
-    return await apolloClient
-        .query({
+export const fetchEventByMessageId = async (messageId: string): Promise<AttendanceEvent | null> => {
+    try {
+        const result = await apolloClient.query({
             variables: { messageId },
             query: gql`
                 query($messageId: String!) {
@@ -75,37 +75,34 @@ export const getEventByMessageId = async (messageId: string): Promise<Attendance
                     }
                 }
             `
-        })
-        .then(result => {
-            const data = result.data.eventByMessageId;
-
-            if (data == null) throw `Event with messageId ${messageId} not found`;
-
-            const { rowId, title, description, startTime, endTime, userId, guildId, channelId, color, url } = data;
-            console.log(`${TAG} | Received event ${rowId} with messageId ${messageId}`);
-
-            return <AttendanceEvent>{
-                rowId,
-                title,
-                description,
-                startTime,
-                endTime,
-                userId,
-                guildId,
-                channelId,
-                color,
-                url
-            };
-        })
-        .catch(error => {
-            console.error(`${TAG} | ${error}`);
-            return null;
         });
+
+        const data = result.data.eventByMessageId;
+        if (data == null) throw new Error(`Event with messageId ${messageId} not found`);
+
+        const { rowId, title, description, startTime, endTime, userId, guildId, channelId, color, url } = data;
+
+        return <AttendanceEvent>{
+            rowId,
+            title,
+            description,
+            startTime,
+            endTime,
+            userId,
+            guildId,
+            channelId,
+            color,
+            url
+        };
+    } catch (error) {
+        console.error(`${TAG}/fetchEventByMessageId | ${error.message}`);
+        return null;
+    }
 };
 
-export const getLastEventId = async (): Promise<number> => {
-    return await apolloClient
-        .query({
+export const fetchLastEventId = async (): Promise<number> => {
+    try {
+        const result = await apolloClient.query({
             fetchPolicy: 'no-cache',
             query: gql`
                 query {
@@ -116,15 +113,14 @@ export const getLastEventId = async (): Promise<number> => {
                     }
                 }
             `
-        })
-        .then(result => {
-            const nodes = result.data.allEvents.nodes;
-            const rowId = nodes.length > 0 ? nodes[0].rowId : 0;
-
-            return parseInt(rowId) + 1;
-        })
-        .catch(error => {
-            console.error(`${TAG} | error`);
-            return -1;
         });
+
+        const nodes = result.data.allEvents.nodes;
+        const rowId = nodes.length > 0 ? nodes[0].rowId : 0;
+
+        return parseInt(rowId) + 1;
+    } catch (error) {
+        console.error(`${TAG}/fetchLastEventId | ${error.message}`);
+        return -1;
+    }
 };

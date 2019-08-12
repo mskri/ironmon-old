@@ -1,83 +1,112 @@
-import { DbUser, DiscordUser } from '../typings';
+import { GuildMember } from 'discord.js';
+import { DiscordUser } from '../typings';
 import apolloClient from '../apollo';
 import gql from 'graphql-tag';
 
 const TAG = 'database/users';
 
-export const getUser = async (id: string): Promise<DbUser | null> => {
-    console.log(`${TAG} | Fetch user ${id}`);
-
-    return await apolloClient
-        .query({
-            variables: { rowId: id },
+export const fetchUser = async (userId: string): Promise<DiscordUser> => {
+    try {
+        const result = await apolloClient.query({
+            variables: { rowId: userId },
             fetchPolicy: 'no-cache',
             query: gql`
                 query($rowId: String!) {
                     userByRowId(rowId: $rowId) {
                         rowId
                         username
-                        discordUsername
-                        discordDiscriminator
+                        discriminator
+                        displayName
                     }
                 }
             `
-        })
-        .then(result => {
-            const data = result.data.userByRowId;
-
-            if (data == null) throw `User ${id} not found`;
-
-            const { rowId, username, discordUsername, discordDiscriminator } = data;
-            console.log(`${TAG} | Received user ${rowId}`);
-
-            return {
-                id: rowId,
-                username,
-                discordUsername,
-                discordDiscriminator
-            };
-        })
-        .catch(error => {
-            console.error(`${TAG} | ${error}`);
-            return null;
         });
+        console.log(result);
+
+        const data = result.data.userByRowId;
+        if (data == null) throw new Error(`User ${userId} not found`);
+
+        const { rowId: id, username: username, discriminator, displayName } = data;
+
+        return <DiscordUser>{
+            id,
+            username,
+            discriminator,
+            displayName
+        };
+    } catch (error) {
+        console.error(`${TAG}/fetchUser | ${error.message}`);
+        throw new Error(`Could not find user`);
+    }
 };
 
-export const saveUser = (user: DiscordUser): void => {
-    const { id, nickname, username, discriminator } = user;
+export const checkIfUserExists = async (userId: string): Promise<boolean> => {
+    try {
+        const result = await apolloClient.query({
+            variables: { rowId: userId },
+            fetchPolicy: 'no-cache',
+            query: gql`
+                query($rowId: String!) {
+                    userByRowId(rowId: $rowId) {
+                        rowId
+                    }
+                }
+            `
+        });
+
+        const data = result.data.userByRowId;
+        return data !== null;
+    } catch (error) {
+        console.error(`${TAG}/checkIfUserExists | ${error.message}`);
+        return false;
+    }
+};
+
+export const saveUser = async (member: GuildMember): Promise<number> => {
+    const { displayName } = member;
+    const { id: rowId, username, discriminator } = member.user;
     const variables = {
-        rowId: id,
-        username: nickname, // Nickname is the name user has set to be visible in the server
-        discordUsername: username,
-        discordDiscriminator: discriminator
+        rowId,
+        username,
+        discriminator,
+        displayName
     };
 
-    apolloClient
-        .mutate({
+    try {
+        const result = await apolloClient.mutate({
             variables,
             mutation: gql`
-                mutation($rowId: String, $username: String, $discordUsername: String, $discordDiscriminator: String) {
+                mutation($rowId: String!, $username: String, $discriminator: String, $displayName: String) {
                     createUser(
                         input: {
                             user: {
                                 rowId: $rowId
                                 username: $username
-                                discordUsername: $discordUsername
-                                discordDiscriminator: $discordDiscriminator
+                                discriminator: $discriminator
+                                displayName: $displayName
                             }
                         }
                     ) {
                         user {
-                            id
                             rowId
                         }
                     }
                 }
             `
-        })
-        .then(result => {
-            const rowId = result.data.createUser.user.rowId;
-            console.log(`${this.default.name} | Saved user ${rowId}`);
-        })
-        .catch(error => console.error(`${TAG} | ${error}`));
+        });
+
+        const rowId = result.data.createUser.user.rowId;
+        console.log(`${TAG}/saveUser | Saved user ${rowId}`);
+
+        return rowId;
+    } catch (error) {
+        console.error(`${TAG}/saveUser | ${error}`);
+        throw new Error('Could not save user');
+    }
+};
+
+export const upsertUser = async (member: GuildMember): Promise<void> => {
+    const userExists = await checkIfUserExists(member.id);
+    if (userExists) return;
+    await saveUser(member);
 };

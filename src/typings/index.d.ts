@@ -72,19 +72,11 @@ export type ReactionTriggerEvent = {
 
 export type DiscordUser = {
     id: string;
-    nickname: string;
     username: string;
     discriminator: string;
-    full: string;
-    ping: string;
-};
-
-// TODO: combine all different user types (e.g. DiscordUser) into a single user type with optional fields (e.g. full and ping)
-type DbUser = {
-    id: string;
-    username: string;
-    discordUsername: string;
-    discordDiscriminator: string;
+    displayName: string;
+    // full: string;
+    // ping: string;
 };
 
 export type Reaction = {
@@ -118,13 +110,6 @@ type AttendanceEvent = {
     guildId: string;
     channelId: string;
     duration?: string;
-};
-
-type AttendanceEventEmbed = {
-    event: AttendanceEvent;
-    noStatusUsers: DiscordUser[];
-    acceptedUsers: DiscordUser[];
-    declinedUsers: DiscordUser[];
 };
 
 type SignupStatus = 'accepted' | 'declined';
