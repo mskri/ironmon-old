@@ -1,10 +1,10 @@
 import { Message } from 'discord.js';
-import { createMessageTrigger } from '../factory';
 import { sendToChannel } from '../helpers';
+import { createCommand } from '../factory';
 
-export default createMessageTrigger({
+export default createCommand({
     name: 'getChannelId',
-    trigger: new RegExp(/^!channel-id\b/),
+    trigger: /^!channel-id/,
     execute: (message: Message) => {
         sendToChannel(message.channel, `This channel's ID is ${message.channel.id}`);
     }

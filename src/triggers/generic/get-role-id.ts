@@ -1,12 +1,12 @@
 import { Message, TextChannel } from 'discord.js';
-import { createMessageTrigger } from '../factory';
 import { sendToChannel } from '../helpers';
+import { createCommand } from '../factory';
 
-export default createMessageTrigger({
+export default createCommand({
     name: 'getRoleId',
-    trigger: new RegExp(/^!role-id\b/),
+    trigger: /^!role-id/,
     execute: (message: Message) => {
-        const roleNameToSearchFor = message.content.replace(this.default.trigger, '').trim();
+        const roleNameToSearchFor = message.content.replace(/^!\w+\s/, '');
         const channel = <TextChannel>message.channel;
         const role = channel.guild.roles.find(role => role.name.toLowerCase() === roleNameToSearchFor.toLowerCase());
 

@@ -10,7 +10,7 @@ import addEvent from './attendance/add-event';
 
 import panic from './admin/panic';
 
-export const reactionTriggers = [eventSignup, deleteMessage];
-export const messageTriggers = [getChannelId, getEmojiId, sayHello, getRoleId, addEvent, panic];
+export const reactions = [eventSignup, deleteMessage];
+export const commands = [getChannelId, getEmojiId, getRoleId, addEvent, panic, sayHello];
 
-export default [...messageTriggers, ...reactionTriggers];
+export default [...commands, ...reactions];

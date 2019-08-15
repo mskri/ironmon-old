@@ -1,29 +1,5 @@
-import { Message, User, MessageReaction, Client, GuildMember, Emoji } from 'discord.js';
+import { WSEventType, Message, User, MessageReaction, Client, GuildMember, Emoji, PermissionString } from 'discord.js';
 import { Dayjs, UnitType } from 'dayjs';
-
-export type MessageTriggerEvent = {
-    logInit(): void;
-    authorHasPermission(): boolean;
-    isConfigured(): boolean;
-    isAllowedChannel(): boolean;
-    authorIsAdmin(): boolean;
-    authorHasPermissionFlags(): boolean;
-    execute(): void;
-};
-
-export type MessageTrigger = {
-    name: string;
-    trigger: RegExp;
-    execute(message: Message): void;
-};
-
-export type TriggerPermissions = {
-    triggers: string[];
-    channels: PermissionChannels;
-    roles: PermissionRoles;
-    admins: string[];
-    permissionFlags?: string[];
-};
 
 export type PermissionChannels = {
     blacklisted: string[];
@@ -35,39 +11,38 @@ export type PermissionRoles = {
     whitelisted: string[];
 };
 
-export type ReactionTrigger = {
-    name: string;
-    reactions: string[]; // ID or identifiers
-    onAddReaction?: (message: Message, event: ReactionEvent) => void | null;
-    onRemoveReaction?: (message: Message, event: ReactionEvent) => void | null;
+export type TriggerPermissions = {
+    triggers: string[];
+    channels: PermissionChannels;
+    roles: PermissionRoles;
+    admins: string[];
+    permissionFlags: PermissionString[];
 };
 
-export type TriggerConfig = {
-    trigger: MessageTrigger | ReactionTrigger;
-    permissions: TriggerPermissions;
-    message: Message;
-    reactionEvent?: ReactionEvent;
-};
-
-export type ReactionEvent = {
-    type: string;
-    reaction: MessageReaction;
-    author: GuildMember;
-    emojiName: string;
-};
-
-export type ReactionTriggerEvent = {
-    logInit: () => void;
-    getType: () => string;
-    authorHasPermission: () => boolean;
-    isConfigured: () => boolean;
-    isAllowedChannel: () => boolean;
-    authorIsAdmin: () => boolean;
+export type TriggerEvent = {
+    isInAllowedChannel(): boolean;
     authorHasPermissionFlags: () => boolean;
-    onAddReaction: () => void;
-    onRemoveReaction: () => void;
-    hasAddReaction: () => boolean;
-    hasRemoveReaction: () => boolean;
+    authorIsAdmin: () => boolean;
+    authorHasRole: () => boolean;
+    execute: () => void;
+};
+
+export type Trigger = {
+    name: string;
+    trigger: RegExp;
+    execute: (message: Message) => void;
+};
+
+export type ReactionListener = {
+    name: string;
+    reactions: string[];
+    onAddReaction?: (message: Message, meta: ReactionMeta, author: GuildMember) => Promise<void> | void;
+    onRemoveReaction?: (message: Message, meta: ReactionMeta, author: GuildMember) => Promise<void> | void;
+};
+
+export type ReactionMeta = {
+    reaction: MessageReaction;
+    emojiName: string;
 };
 
 export type DiscordUser = {
@@ -75,8 +50,6 @@ export type DiscordUser = {
     username: string;
     discriminator: string;
     displayName: string;
-    // full: string;
-    // ping: string;
 };
 
 export type Reaction = {
@@ -86,7 +59,7 @@ export type Reaction = {
     color: number;
 };
 
-export type Args = {
+export type InputArgs = {
     title?: string;
     details?: string;
     color?: string;
@@ -98,7 +71,7 @@ export type Args = {
 
 export type Duration = [number, UnitType];
 
-type AttendanceEvent = {
+export type AttendanceEvent = {
     rowId: number;
     title: string;
     description: string;
@@ -112,9 +85,9 @@ type AttendanceEvent = {
     duration?: string;
 };
 
-type SignupStatus = 'accepted' | 'declined';
+export type SignupStatus = 'accepted' | 'declined';
 
-type Signup = {
+export type Signup = {
     rowId: number;
     status: SignupStatus;
     eventId: string;

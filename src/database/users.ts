@@ -21,7 +21,6 @@ export const fetchUser = async (userId: string): Promise<DiscordUser> => {
                 }
             `
         });
-        console.log(result);
 
         const data = result.data.userByRowId;
         if (data == null) throw new Error(`User ${userId} not found`);

@@ -1,9 +1,9 @@
 import { Message } from 'discord.js';
-import { createMessageTrigger } from '../factory';
+import { createCommand } from '../factory';
 
-export default createMessageTrigger({
-    trigger: new RegExp(/^!panic\b/),
+export default createCommand({
     name: 'panic',
+    trigger: /^!panic/,
     execute: (_: Message) => {
         process.exit(1);
     }

@@ -54,14 +54,13 @@ const processargvify = (input: string): string[] => {
     return input
         .split(regExp)
         .filter(o => o) // Filter out undefined and nulls
-        .filter(o => o.trim().length > 0) // Filter out blanks and spaces
-        .slice(1); // Removes the command part from the beginning, e.g. '!add'
+        .filter(o => o.trim().length > 0); // Filter out blanks and spaces
 };
 
-export const parseArgs = <T>(input: string, defaults: T): T => {
+export const parseArgs = (input: string, defaults: object): { [key: string]: string | boolean | number | Dayjs } => {
     const argKeyRegExp = /^--\w+/;
     let args = processargvify(input.trim());
-    let props = {};
+    let props: { [key: string]: string | boolean | number | Dayjs } = {};
 
     for (let i = 0; i < args.length; i++) {
         const current = args[i];
@@ -79,7 +78,7 @@ export const parseArgs = <T>(input: string, defaults: T): T => {
         }
     }
 
-    return Object.assign(defaults, props);
+    return Object.assign({}, defaults, props);
 };
 
 export const findMissingKeys = (requiredKeys: string[], args: object = {}): string[] => {

@@ -1,10 +1,10 @@
 import { Message } from 'discord.js';
-import { createMessageTrigger } from '../factory';
 import { sendToChannel } from '../helpers';
+import { createCommand } from '../factory';
 
-export default createMessageTrigger({
+export default createCommand({
     name: 'sayHello',
-    trigger: new RegExp(/^hello\b/),
+    trigger: /hello/,
     execute: (message: Message) => {
         sendToChannel(message.channel, `Hello ${message.author}`);
     }

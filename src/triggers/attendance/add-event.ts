@@ -1,6 +1,6 @@
-import { AttendanceEvent, Args } from '../../typings';
+import { AttendanceEvent, InputArgs } from '../../typings';
 import { Message, TextChannel, RichEmbed, GuildMember } from 'discord.js';
-import { createMessageTrigger } from '../factory';
+import { createCommand } from '../factory';
 import { sendToChannel, editMessage } from '../helpers';
 import { parseArgs, findMissingKeys } from '../../utils/parse-args';
 import { isHexColorFormat } from '../../utils/validators';
@@ -11,7 +11,7 @@ import { sendErrorToChannel, getMembersWithRoleSorted } from '../helpers';
 
 const requiredRole = 'Raider all'; // TODO: change to better one
 const requiredArgs = ['title', 'start', 'duration'];
-const defaultArgs: Args = {
+const defaultArgs = {
     color: '#000000',
     url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
 };
@@ -20,27 +20,28 @@ const reactionstoAdd = [
     '481485635836837888' // :accepted:
 ];
 
-export default createMessageTrigger({
+export default createCommand({
     name: 'addEvent',
-    trigger: new RegExp(/^!add-event\b/),
+    trigger: /^!add-event/,
     execute: async (message: Message) => {
         try {
             const { content, channel, member } = message;
 
             // Remove the command part, .e.g '!add', from beginning of the message
-            const input: string = content.slice(this.default.trigger.length, content.length);
-            const args: Args = parseArgs(input, defaultArgs);
+            const input: string = content.replace(/^!\w+\s/, '').trim();
+            const args: InputArgs = <InputArgs>parseArgs(input, defaultArgs);
             const missingKeys: string[] = findMissingKeys(requiredArgs, args);
+            const { start, color } = args;
 
             if (missingKeys.length > 0) {
                 throw `Missing following arguments: ${missingKeys.join(', ')}`;
             }
 
-            if (!args.start.isValid()) {
+            if (start && !start.isValid()) {
                 throw new Error('Invalid start time format');
             }
 
-            if (!isHexColorFormat(args.color)) {
+            if (color && !isHexColorFormat(color)) {
                 throw new Error('Invalid color format, should be hex value with 6 digits. E.g. #ff000.');
             }
 
@@ -76,7 +77,7 @@ export default createMessageTrigger({
                 }
             });
         } catch (error) {
-            console.error(`${this.default.name} | ${error.message}`);
+            console.error(`addEvent | ${error}`);
             sendErrorToChannel(message.channel, `Error creating new event: ${error.message}`);
         }
     }

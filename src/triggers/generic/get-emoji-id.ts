@@ -1,12 +1,12 @@
 import { Message, TextChannel } from 'discord.js';
-import { createMessageTrigger } from '../factory';
 import { sendToChannel } from '../helpers';
+import { createCommand } from '../factory';
 
-export default createMessageTrigger({
+export default createCommand({
     name: 'getEmojiId',
-    trigger: new RegExp(/^!emoji-id\b/),
+    trigger: /^!emoji-id/,
     execute: (message: Message) => {
-        const reactionNameToSearchFor = message.content.replace(this.default.trigger, '').trim();
+        const reactionNameToSearchFor: string = message.content.replace(/^!\w+\s/, '');
         const channel = <TextChannel>message.channel;
         const emoji = channel.guild.emojis.find(emoji => emoji.name === reactionNameToSearchFor);
 

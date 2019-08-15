@@ -1,13 +1,12 @@
 import { Message } from 'discord.js';
-import { ReactionEvent } from '../../typings';
-import { createReactionTrigger } from '../factory';
+import { createReactionListener } from '../factory';
 
-export default createReactionTrigger({
+export default createReactionListener({
     name: 'deleteMessageReaction',
     reactions: [
         '❌' // :x:
     ],
-    onAddReaction: (message: Message, _: ReactionEvent) => {
+    onAddReaction: (message: Message) => {
         message.delete();
     }
 });

@@ -1,6 +1,6 @@
 import { Message, TextChannel, GuildMember, RichEmbed } from 'discord.js';
-import { ReactionEvent, Signup, SignupStatus } from '../../typings';
-import { createReactionTrigger } from '../factory';
+import { ReactionMeta, Signup, SignupStatus } from '../../typings';
+import { createReactionListener } from '../factory';
 import { getMembersWithRoleSorted, editMessage } from '../helpers';
 import { saveSingup, updateSignupStatus, getSignupsForEventByEventId } from '../../database/signups';
 import { upsertUser } from '../../database/users';
@@ -21,14 +21,14 @@ const isAccepted = (signup: Signup): boolean => signup.status === 'accepted';
 
 const isDeclined = (signup: Signup): boolean => signup.status === 'declined';
 
-export default createReactionTrigger({
+export default createReactionListener({
     name: 'eventSignupReaction',
     reactions: [
         'accepted', // :accepted:
         'declined' // :declined:
     ],
-    onAddReaction: async (message: Message, event: ReactionEvent) => {
-        const { author, reaction, emojiName } = event;
+    onAddReaction: async (message: Message, meta: ReactionMeta, author: GuildMember) => {
+        const { reaction, emojiName } = meta;
         const { channel, guild } = message;
 
         // Remove the reaction of the person who added the reaction
@@ -37,7 +37,7 @@ export default createReactionTrigger({
         const newStatus: SignupStatus = emojiNameToSignupStatus(emojiName);
         const allSignups: Signup[] = await getSignupsForEventByEventId(reaction.message.id);
         const membersInChannel: GuildMember[] = getMembersWithRoleSorted(<TextChannel>channel, requiredRole);
-        const oldSignup: Signup = allSignups.find(signup => signup.userId == author.id);
+        const oldSignup = allSignups.find(signup => signup.userId == author.id);
 
         if (oldSignup) {
             if (oldSignup.status !== newStatus) {
@@ -49,7 +49,13 @@ export default createReactionTrigger({
             }
         } else {
             await upsertUser(author);
-            const storedSignup: Signup = await saveSingup(newStatus, message.id, author.id);
+            const storedSignup: Signup | null = await saveSingup(newStatus, message.id, author.id);
+
+            if (!storedSignup) {
+                // TOODO: send error to channel?
+                return;
+            }
+
             allSignups.push(storedSignup);
         }
 
