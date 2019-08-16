@@ -24,7 +24,7 @@ export type TriggerEvent = {
     permissions: TriggerPermissions;
     author: GuildMember;
     message: Message;
-    command?: Trigger;
+    command?: Command;
     reactionListener?: ReactionListener;
     reactionMeta?: ReactionMeta;
     execute: () => void;
@@ -35,12 +35,12 @@ export type TriggerOpts = {
     permissions: TriggerPermissions;
     author: GuildMember;
     message: Message;
-    command?: Trigger;
+    command?: Command;
     reactionListener?: ReactionListener;
     reactionMeta?: ReactionMeta;
 };
 
-export type Trigger = {
+export type Command = {
     name: string;
     trigger: RegExp;
     execute: (message: Message) => void;

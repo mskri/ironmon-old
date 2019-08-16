@@ -1,5 +1,5 @@
 import { Client, Message, MessageReaction, Emoji, TextChannel, Guild, ReactionEmoji, WSEventType } from 'discord.js';
-import { Trigger, TriggerPermissions, ReactionMeta, ReactionListener } from './typings';
+import { Command, TriggerPermissions, ReactionMeta, ReactionListener } from './typings';
 import { createCommandEvent } from './triggers/factory';
 import { eventQueue } from './triggers/queue';
 import { commands, reactions } from './triggers';
@@ -11,7 +11,7 @@ import triggerPermissions from './configs/trigger-permissions';
 // if discord.js changes that they should be changed to reflect the new ones here too.
 const RAW_EVENTS_TO_LISTEN = ['MESSAGE_REACTION_ADD', 'MESSAGE_REACTION_REMOVE'];
 
-const findMatchingCommand = (commands: Trigger[], message: string): Trigger | undefined => {
+const findMatchingCommand = (commands: Command[], message: string): Command | undefined => {
     return commands.find(command => (command.trigger instanceof RegExp ? command.trigger.test(message) : false));
 };
 

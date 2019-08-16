@@ -1,6 +1,6 @@
 import { Message, PermissionString, GuildMember, TextChannel, DMChannel, GroupDMChannel } from 'discord.js';
 import {
-    Trigger,
+    Command,
     TriggerEvent,
     ReactionListener,
     PermissionRoles,
@@ -98,7 +98,7 @@ export const authorHasRole = (author: GuildMember, roles: PermissionRoles): bool
 };
 
 // TODO: this is just for visual convenience so you can do createCommand({...}). Could be removed?
-export const createCommand = (command: Trigger): Trigger => command;
+export const createCommand = (command: Command): Command => command;
 
 // TODO: this is just for visual convenience so you can do createReactionListener({...}). Could be removed?
 export const createReactionListener = (reactionListener: ReactionListener): ReactionListener => reactionListener;
@@ -120,7 +120,7 @@ export const createCommandEvent = (opts: TriggerOpts): TriggerEvent => {
         }
     };
 
-    const executeOnMessage = (messageTrigger?: Trigger, message?: Message) => {
+    const executeOnMessage = (messageTrigger?: Command, message?: Message) => {
         if (messageTrigger && messageTrigger.execute && message) {
             console.log('Triggered messageTrigger');
             messageTrigger.execute(message);
