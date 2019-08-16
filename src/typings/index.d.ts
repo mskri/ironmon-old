@@ -20,11 +20,24 @@ export type TriggerPermissions = {
 };
 
 export type TriggerEvent = {
-    isInAllowedChannel(): boolean;
-    authorHasPermissionFlags: () => boolean;
-    authorIsAdmin: () => boolean;
-    authorHasRole: () => boolean;
+    eventType: WSEventType;
+    permissions: TriggerPermissions;
+    author: GuildMember;
+    message: Message;
+    command?: Trigger;
+    reactionListener?: ReactionListener;
+    reactionMeta?: ReactionMeta;
     execute: () => void;
+};
+
+export type TriggerOpts = {
+    eventType: WSEventType;
+    permissions: TriggerPermissions;
+    author: GuildMember;
+    message: Message;
+    command?: Trigger;
+    reactionListener?: ReactionListener;
+    reactionMeta?: ReactionMeta;
 };
 
 export type Trigger = {
