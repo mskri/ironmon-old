@@ -1,9 +1,16 @@
 import { Client, Message, Guild } from 'discord.js';
-import { AUTH_TOKEN } from './src/configs/bot';
-import * as bot from './src/bot';
+import { AUTH_TOKEN } from './configs/env';
+import * as bot from './bot';
 
 const client = new Client({
-    disabledEvents: ['PRESENCE_UPDATE', 'TYPING_START', 'VOICE_STATE_UPDATE', 'VOICE_SERVER_UPDATE']
+    disabledEvents: [
+        'PRESENCE_UPDATE',
+        'TYPING_START',
+        'USER_NOTE_UPDATE',
+        'VOICE_SERVER_UPDATE',
+        'VOICE_STATE_UPDATE',
+        'WEBHOOKS_UPDATE'
+    ]
 });
 
 client.on('guildCreate', (guild: Guild) => bot.onGuildCreate(guild));

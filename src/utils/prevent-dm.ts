@@ -1,5 +1,5 @@
 import { Message, Client } from 'discord.js';
-import { OWNER_ID } from '../configs/bot';
+import { OWNER_ID } from '../configs/env';
 
 export default function preventDM(client: Client, message: Message): boolean {
     if (message.channel.type == 'dm') {
