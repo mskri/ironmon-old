@@ -59,10 +59,6 @@ export const authorHasPermissionFlags = (author: GuildMember, permissionFlags: P
     return true;
 };
 
-export const authorIsAdmin = (author: GuildMember, admins: string[]): boolean => {
-    return admins.length === 0 ? true : admins.includes(author.id);
-};
-
 export const authorHasRole = (author: GuildMember, roles: PermissionRoles): boolean => {
     const { whitelisted, blacklisted } = roles;
     const authorRoles = getRolesOfGuildMember(author);
