@@ -1,12 +1,14 @@
-import { Message, TextChannel, GuildMember, RichEmbed } from 'discord.js';
+import { Message, TextChannel, Guild, GuildMember, RichEmbed } from 'discord.js';
 import { ReactionMeta, Signup, SignupStatus } from '../../typings';
 import { createReactionListener } from '../factory';
-import { getMembersWithRoleSorted, editMessage } from '../helpers';
+import { getMembersWithRoleSorted, sendToChannel, editMessage } from '../helpers';
 import { saveSingup, updateSignupStatus, getSignupsForEventByEventId } from '../../database/signups';
 import { upsertUser } from '../../database/users';
-import { createEmbedFields } from './attendance-helpers';
+import { createEmbedFields, createSignupNoticeEmbed } from './attendance-helpers';
 
 const requiredRole = 'Raider all';
+const logChannel = 'attendance-log';
+const statusColorMap = new Map<SignupStatus, number>([['accepted', 0x69e4a6], ['declined', 0xff7285]]);
 
 const memberHasNoStatus = (signups: Signup[], member: GuildMember): boolean => {
     return !signups.map(signup => signup.userId).includes(member.id);
@@ -17,9 +19,26 @@ const displayNameAlphabetically = (a: GuildMember, b: GuildMember) => a.displayN
 const emojiNameToSignupStatus = (emojiName: string): SignupStatus =>
     emojiName === 'accepted' ? 'accepted' : 'declined';
 
-const isAccepted = (signup: Signup): boolean => signup.status === 'accepted';
+const getAcceptedSignups = (signups: Signup[], guild: Guild): GuildMember[] => {
+    return signups
+        .filter(signup => signup.status === 'accepted')
+        .map(signup => guild.members.find(member => member.id === signup.userId))
+        .sort(displayNameAlphabetically);
+};
 
-const isDeclined = (signup: Signup): boolean => signup.status === 'declined';
+const getDeclinedSignups = (signups: Signup[], guild: Guild): GuildMember[] => {
+    return signups
+        .filter(signup => signup.status === 'declined')
+        .map(signup => guild.members.find(member => member.id === signup.userId))
+        .sort(displayNameAlphabetically);
+};
+
+const getNoStatusSignups = (signups: Signup[], membersInChannel: GuildMember[], author: GuildMember): GuildMember[] => {
+    return membersInChannel
+        .filter(member => memberHasNoStatus(signups, member))
+        .filter(member => member.id !== author.id)
+        .sort(displayNameAlphabetically);
+};
 
 export default createReactionListener({
     name: 'eventSignupReaction',
@@ -29,59 +48,57 @@ export default createReactionListener({
     ],
     onAddReaction: async (message: Message, meta: ReactionMeta, author: GuildMember) => {
         const { reaction, emojiName } = meta;
-        const { channel, guild } = message;
+        const { client, channel, guild } = message;
 
         // Remove the reaction of the person who added the reaction
         reaction.remove(author);
 
         const newStatus: SignupStatus = emojiNameToSignupStatus(emojiName);
         const allSignups: Signup[] = await getSignupsForEventByEventId(reaction.message.id);
-        const membersInChannel: GuildMember[] = getMembersWithRoleSorted(<TextChannel>channel, requiredRole);
-        const oldSignup = allSignups.find(signup => signup.userId == author.id);
+        let oldSignup: Signup | undefined | null = allSignups.find(signup => signup.userId == author.id);
+        let oldStatus: SignupStatus | null = null;
 
         if (oldSignup) {
             if (oldSignup.status !== newStatus) {
                 oldSignup.status = newStatus;
                 updateSignupStatus(oldSignup, newStatus);
+                oldStatus = oldSignup.status;
             } else {
                 // Already same status do nothing
                 return;
             }
         } else {
             await upsertUser(author);
-            const storedSignup: Signup | null = await saveSingup(newStatus, message.id, author.id);
+            oldSignup = await saveSingup(newStatus, message.id, author.id);
 
-            if (!storedSignup) {
+            if (!oldSignup) {
                 // TOODO: send error to channel?
                 return;
             }
 
-            allSignups.push(storedSignup);
+            allSignups.push(oldSignup);
         }
 
-        const acceptedUsers: GuildMember[] = allSignups
-            .filter(isAccepted)
-            .map(signup => guild.members.find(member => member.id === signup.userId))
-            .sort(displayNameAlphabetically);
+        const membersInChannel: GuildMember[] = getMembersWithRoleSorted(<TextChannel>channel, requiredRole);
+        const noStatusUsers: GuildMember[] = getNoStatusSignups(allSignups, membersInChannel, author);
+        const acceptedUsers: GuildMember[] = getAcceptedSignups(allSignups, guild);
+        const declinedUsers: GuildMember[] = getDeclinedSignups(allSignups, guild);
 
-        const declinedUsers: GuildMember[] = allSignups
-            .filter(isDeclined)
-            .map(signup => guild.members.find(member => member.id === signup.userId))
-            .sort(displayNameAlphabetically);
+        const eventEmbedFromMessage = reaction.message.embeds[0];
+        const updatedEmbed = new RichEmbed(eventEmbedFromMessage);
+        updatedEmbed.fields = createEmbedFields(acceptedUsers, declinedUsers, noStatusUsers);
+        updatedEmbed.timestamp = new Date();
 
-        const noStatusUsers: GuildMember[] = membersInChannel
-            .filter(member => memberHasNoStatus(allSignups, member))
-            .filter(member => member.id !== author.id)
-            .sort(displayNameAlphabetically);
+        editMessage(reaction.message, updatedEmbed);
 
-        const receivedEmbed = reaction.message.embeds[0];
-        const embed = new RichEmbed(receivedEmbed);
-        embed.fields = createEmbedFields(acceptedUsers, declinedUsers, noStatusUsers);
-        embed.timestamp = new Date();
+        const channelsInGuild = client.guilds.find(guild => guild.id === message.guild.id).channels;
+        const outChannelId = channelsInGuild.find(channel => channel.name === logChannel).id;
+        const outChannel = <TextChannel>client.channels.get(outChannelId);
 
-        editMessage(reaction.message, embed);
-        // TODO message log channel
-        // TODO add 'update event' emoji to update event from db?
-        // TODO make the message and event.reaction more clear. For reactions the msg the reaction was added is different in command the message.id is the one we should use
+        if (!outChannel) console.error('Event signup log channel not found'); // TODO inform owner via dm?
+
+        const statusColor: number = statusColorMap.get(newStatus) || 0x000000;
+        const signupEmbed = createSignupNoticeEmbed(author, oldSignup.eventRowId, statusColor, newStatus, oldStatus);
+        sendToChannel(outChannel, signupEmbed);
     }
 });

@@ -4,7 +4,7 @@ import * as relativeTime from 'dayjs/plugin/relativeTime';
 import * as utc from 'dayjs/plugin/utc';
 import { UnitType, Dayjs } from 'dayjs';
 import { RichEmbed, Message, GuildMember } from 'discord.js';
-import { AttendanceEvent, InputArgs, Duration } from '../../typings';
+import { AttendanceEvent, InputArgs, Duration, SignupStatus } from '../../typings';
 import { timestampFormat } from '../../configs/constants';
 import { fetchLastEventId } from '../../database/events';
 
@@ -103,11 +103,6 @@ export const createEmbedFields = (
 ): { name: string; value: string; inline?: boolean }[] => {
     return [
         {
-            // Blank field for more visual space
-            name: '\u200b',
-            value: '\u200b'
-        },
-        {
             name: `Accepted (${acceptedUsers.length})`,
             value: formatFieldData(acceptedUsers),
             inline: true
@@ -116,11 +111,6 @@ export const createEmbedFields = (
             name: `Declined (${declinedUsers.length})`,
             value: formatFieldData(declinedUsers),
             inline: true
-        },
-        {
-            // Blank field for more visual space
-            name: '\u200b',
-            value: '\u200b'
         },
         {
             name: `Not set (${noStatusUsers.length})`,
@@ -154,5 +144,24 @@ export const createEventEmbed = (data: {
         footer: {
             text: 'Set your status by reacting with the emojis below'
         }
+    });
+};
+
+export const createSignupNoticeEmbed = (
+    author: GuildMember,
+    eventId: string,
+    color: number,
+    status: SignupStatus,
+    oldStatus?: SignupStatus | null
+): RichEmbed => {
+    const newStatus = `[#${eventId}] ${author.displayName} signed up as ${status}`;
+    const changeStatus = `[#${eventId}] ${author.displayName} changed status to ${status}`;
+    const title = oldStatus ? changeStatus : newStatus;
+
+    return new RichEmbed({
+        color,
+        title,
+        description: `<@${author.id}>`,
+        timestamp: new Date()
     });
 };

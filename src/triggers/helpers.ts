@@ -8,8 +8,30 @@ import {
     ReactionEmoji,
     Emoji
 } from 'discord.js';
+import { TriggerPermissions, Command, ReactionListener } from '../typings';
 
 // TODO: make logging better, maybe util function? Now e.g. user's details need to be parsed multiple times
+
+export const findTriggerPermissions = (
+    triggerPermissions: TriggerPermissions[],
+    triggerName: string
+): TriggerPermissions | undefined => {
+    return triggerPermissions.find(conf => conf.triggers.includes(triggerName));
+};
+
+export const findMatchingCommand = (commands: Command[], message: string): Command | undefined => {
+    return commands.find(command => (command.trigger instanceof RegExp ? command.trigger.test(message) : false));
+};
+
+export const findMatchingReactionListener = (
+    reactions: ReactionListener[],
+    emoji: Emoji | ReactionEmoji
+): ReactionListener | undefined => {
+    return reactions.find(item => {
+        const { reactions } = item;
+        return reactions ? reactions.includes(emoji.id) || reactions.includes(emoji.name) : false;
+    });
+};
 
 export const matchesTrigger = (trigger: RegExp | undefined, message: string): boolean => {
     if (!trigger) return false;

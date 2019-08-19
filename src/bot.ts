@@ -2,6 +2,7 @@ import { Client, Message, MessageReaction, Emoji, TextChannel, Guild, ReactionEm
 import { Command, TriggerPermissions, ReactionMeta, ReactionListener } from './typings';
 import { createCommandEvent } from './triggers/factory';
 import { eventQueue } from './triggers/queue';
+import { findMatchingCommand, findMatchingReactionListener } from './triggers/helpers';
 import { commands, reactions } from './triggers';
 
 import preventDM from './utils/prevent-dm';
@@ -10,27 +11,6 @@ import triggerPermissions from './configs/trigger-permissions';
 // Note: should match MESSAGE_REACTION_ADD or MESSAGE_REACTION_REMOVE from discord.js
 // if discord.js changes that they should be changed to reflect the new ones here too.
 const RAW_EVENTS_TO_LISTEN = ['MESSAGE_REACTION_ADD', 'MESSAGE_REACTION_REMOVE'];
-
-const findMatchingCommand = (commands: Command[], message: string): Command | undefined => {
-    return commands.find(command => (command.trigger instanceof RegExp ? command.trigger.test(message) : false));
-};
-
-const findMatchingReactionListener = (
-    reactions: ReactionListener[],
-    emoji: Emoji | ReactionEmoji
-): ReactionListener | undefined => {
-    return reactions.find(item => {
-        const { reactions } = item;
-        return reactions ? reactions.includes(emoji.id) || reactions.includes(emoji.name) : false;
-    });
-};
-
-const findTriggerPermissions = (
-    triggerPermissions: TriggerPermissions[],
-    triggerName: string
-): TriggerPermissions | undefined => {
-    return triggerPermissions.find(conf => conf.triggers.includes(triggerName));
-};
 
 export const onGuildCreate = (guild: Guild) => {
     console.log(`Joined a new guild ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);

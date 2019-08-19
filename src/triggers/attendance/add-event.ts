@@ -16,8 +16,8 @@ const defaultArgs = {
     url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
 };
 const reactionstoAdd = [
-    '481485649732698124', // :declined:
-    '481485635836837888' // :accepted:
+    '481485635836837888', // :accepted:
+    '481485649732698124' // :declined:
 ];
 
 export default createCommand({
@@ -29,7 +29,7 @@ export default createCommand({
 
             // Remove the command part, .e.g '!add', from beginning of the message
             const input: string = content.replace(/^!\w+\s/, '').trim();
-            const args: InputArgs = <InputArgs>parseArgs(input, defaultArgs);
+            const args: InputArgs = parseArgs(input, defaultArgs);
             const missingKeys: string[] = findMissingKeys(requiredArgs, args);
             const { start, color } = args;
 

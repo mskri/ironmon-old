@@ -17,6 +17,9 @@ export type TriggerPermissions = {
     roles: PermissionRoles;
     admins: string[];
     permissionFlags: PermissionString[];
+    options?: {
+        [key: string]: string;
+    };
 };
 
 export type TriggerEvent = {
@@ -105,4 +108,5 @@ export type Signup = {
     status: SignupStatus;
     eventId: string;
     userId: string;
+    eventRowId: string;
 };

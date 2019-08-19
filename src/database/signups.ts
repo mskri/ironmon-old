@@ -22,6 +22,9 @@ export const saveSingup = async (status: SignupStatus, eventId: string, userId: 
                             status
                             eventId
                             userId
+                            eventByEventId {
+                                rowId
+                            }
                         }
                     }
                 }
@@ -29,12 +32,15 @@ export const saveSingup = async (status: SignupStatus, eventId: string, userId: 
         });
 
         // TODO: check result
-        const { rowId, status, eventId, userId } = result.data.createEventSignup.eventSignup;
-        return <Signup>{
+        const { rowId, status, eventId, userId, eventByEventId } = result.data.createEventSignup.eventSignup;
+        const eventRowId = eventByEventId.rowId;
+
+        return {
             rowId,
             status,
             eventId,
-            userId
+            userId,
+            eventRowId
         };
     } catch (error) {
         console.error(`${TAG}/saveSingup | ${error.message}`);
@@ -118,6 +124,9 @@ export const getSignupsForEventByEventId = async (messageId: string): Promise<Si
                             eventId
                             status
                             userId
+                            eventByEventId {
+                                rowId
+                            }
                         }
                     }
                 }
@@ -126,7 +135,13 @@ export const getSignupsForEventByEventId = async (messageId: string): Promise<Si
 
         const data = result.data.allEventSignups.nodes;
         // TODO: check result data
-        return <Signup[]>data;
+        return data.map((element: any) => ({
+            rowId: element.rowId,
+            eventId: element.eventId,
+            status: element.status,
+            userId: element.userId,
+            eventRowId: element.eventByEventId.rowId
+        }));
     } catch (error) {
         console.error(`${TAG}/getSignupsForEventByEventId | ${error}`);
         return [];

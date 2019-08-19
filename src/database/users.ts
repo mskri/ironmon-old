@@ -23,7 +23,7 @@ export const fetchUser = async (userId: string): Promise<DiscordUser> => {
         });
 
         const data = result.data.userByRowId;
-        if (data == null) throw new Error(`User ${userId} not found`);
+        if (!data) throw new Error(`User ${userId} not found`);
 
         const { rowId: id, username: username, discriminator, displayName } = data;
 
@@ -104,8 +104,8 @@ export const saveUser = async (member: GuildMember): Promise<number> => {
     }
 };
 
-export const upsertUser = async (member: GuildMember): Promise<void> => {
+export const upsertUser = async (member: GuildMember): Promise<number | null> => {
     const userExists = await checkIfUserExists(member.id);
-    if (userExists) return;
-    await saveUser(member);
+    if (userExists) return null;
+    return await saveUser(member);
 };

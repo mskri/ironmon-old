@@ -41,7 +41,6 @@ export const isInAllowedChannel = (
         return true;
     }
 
-    console.log(`Trigger was triggered in whitelisted channel`);
     return false;
 };
 
