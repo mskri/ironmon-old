@@ -22,16 +22,9 @@ export const isInAllowedChannel = (
         return false;
     }
 
-    // If whitelisted channels is '*' it means every channel should be allowed
-    if (whitelisted[0] === '*') {
-        // If blacklisted channels isn't empty there's contradiction.
-        // All channels can't be allowed if n is blacklisted
-        if (blacklisted.length !== 0) {
-            console.error(`All channels are whitelisted but blacklist is not empty`);
-            return false;
-        }
-
-        console.log(`All channels whitelisted`);
+    // If whitelisted and blacklisted channels are both empty every channel should be allowed
+    if (whitelisted[0].length === 0 && blacklisted.length === 0) {
+        console.log(`All channels allowed`);
         return true;
     }
 
@@ -69,16 +62,9 @@ export const authorHasRole = (author: GuildMember, roles: PermissionRoles): bool
         return false;
     }
 
-    // If whitelisted roles has '*' allow all roles that are not blacklisted
-    if (whitelisted[0] === '*') {
-        // If blacklisted roles isn't empty there's contradiction.
-        // All roles can't be allowed if n is blacklisted
-        if (blacklisted.length !== 0) {
-            console.error(`All roles are whitelisted but blacklist is not empty`);
-            return false;
-        }
-
-        console.log(`All roles are whitelisted`);
+    // If whitelisted and blacklisted roles are both empty allow all roles
+    if (whitelisted[0].length === 0 && blacklisted.length !== 0) {
+        console.log(`All roles are allowed`);
         return true;
     }
 

@@ -1,9 +1,9 @@
 import ironbot from './ironbot';
-import { TriggerPermissions } from '../../typings';
+import { TriggerConfig } from '../../typings';
 
 // TODO: Ideally these settings would be received from db and not from hardcoded json
-const permissions: { [key: string]: TriggerPermissions[] } = {
+const configs: { [key: string]: TriggerConfig[] } = {
     '369588869794103297': ironbot
 };
 
-export default permissions;
+export default configs;

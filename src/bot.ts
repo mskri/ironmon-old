@@ -1,12 +1,10 @@
-import { Client, Message, MessageReaction, Emoji, TextChannel, Guild, ReactionEmoji, WSEventType } from 'discord.js';
-import { Command, TriggerPermissions, ReactionMeta, ReactionListener } from './typings';
+import { Client, Message, MessageReaction, Emoji, TextChannel, Guild, WSEventType, GuildMember } from 'discord.js';
+import { Command, ReactionMeta, ReactionListener, TriggerConfig } from './typings';
 import { createCommandEvent } from './triggers/factory';
 import { eventQueue } from './triggers/queue';
-import { findMatchingCommand, findMatchingReactionListener } from './triggers/helpers';
+import { findMatchingCommand, findMatchingReactionListener, getTriggerConfig } from './triggers/helpers';
 import { commands, reactions } from './triggers';
-
 import preventDM from './utils/prevent-dm';
-import triggerPermissions from './configs/trigger-permissions';
 
 // Note: should match MESSAGE_REACTION_ADD or MESSAGE_REACTION_REMOVE from discord.js
 // if discord.js changes that they should be changed to reflect the new ones here too.
@@ -39,20 +37,15 @@ export const onMessage = (client: Client, message: Message) => {
 
     // Check if the message matches any triggers (commands)
     // Triggers are defined with regex and don't necessarily start with !command
-    const command = findMatchingCommand(commands, message.content);
+    const command: Command | undefined = findMatchingCommand(commands, message.content);
     if (!command) return;
 
-    const triggerPermissionsForGuild = triggerPermissions[message.guild.id];
-    const permissions: TriggerPermissions | undefined = findTriggerPermissions(
-        triggerPermissionsForGuild,
-        command.name
-    );
+    const config: TriggerConfig | null = getTriggerConfig(message.guild.id, command.name);
+    if (!config) return;
 
-    if (!permissions) return;
-
-    const author = message.member;
+    const author: GuildMember = message.member;
     const eventType: WSEventType = 'MESSAGE_CREATE';
-    const messageTrigger = createCommandEvent({ eventType, permissions, author, message, command });
+    const messageTrigger = createCommandEvent({ eventType, config, author, message, command });
 
     eventQueue.next(messageTrigger);
 };
@@ -94,17 +87,13 @@ export const onRaw = async (client: Client, event: any) => {
         emojiName: data.emoji.name
     };
 
-    const triggerPermissionsForGuild = triggerPermissions[message.guild.id];
-    const permissions: TriggerPermissions | undefined = findTriggerPermissions(
-        triggerPermissionsForGuild,
-        reactionListener.name
-    );
-    if (!permissions) return;
+    const config: TriggerConfig | null = getTriggerConfig(guild.id, reactionListener.name);
+    if (!config) return;
 
     const eventType = <WSEventType>event.t;
     const listenerEvent = createCommandEvent({
         eventType,
-        permissions,
+        config,
         author,
         message,
         reactionListener,

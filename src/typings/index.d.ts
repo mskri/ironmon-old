@@ -1,6 +1,16 @@
 import { WSEventType, Message, User, MessageReaction, Client, GuildMember, Emoji, PermissionString } from 'discord.js';
 import { Dayjs, UnitType } from 'dayjs';
 
+export type TriggerConfig = {
+    triggers: string[];
+    channels: PermissionChannels;
+    roles: PermissionRoles;
+    permissionFlags: PermissionString[];
+    options?: {
+        [key: string]: string;
+    };
+};
+
 export type PermissionChannels = {
     blacklisted: string[];
     whitelisted: string[];
@@ -11,20 +21,9 @@ export type PermissionRoles = {
     whitelisted: string[];
 };
 
-export type TriggerPermissions = {
-    triggers: string[];
-    channels: PermissionChannels;
-    roles: PermissionRoles;
-    admins: string[];
-    permissionFlags: PermissionString[];
-    options?: {
-        [key: string]: string;
-    };
-};
-
 export type TriggerEvent = {
     eventType: WSEventType;
-    permissions: TriggerPermissions;
+    config: TriggerConfig;
     author: GuildMember;
     message: Message;
     command?: Command;
@@ -35,7 +34,7 @@ export type TriggerEvent = {
 
 export type TriggerOpts = {
     eventType: WSEventType;
-    permissions: TriggerPermissions;
+    config: TriggerConfig;
     author: GuildMember;
     message: Message;
     command?: Command;

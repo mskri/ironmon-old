@@ -1,8 +1,8 @@
-import { TriggerPermissions } from '../../typings';
+import { TriggerConfig } from '../../typings';
 
-const triggerPermissions: TriggerPermissions[] = [
+const triggerPermissions: TriggerConfig[] = [
     {
-        triggers: ['sayHello', 'getChannelId', 'getEmojiId', 'getRoleId', 'addEvent'],
+        triggers: ['sayHello', 'getChannelId', 'getEmojiId', 'getRoleId'],
         channels: {
             blacklisted: [],
             whitelisted: [
@@ -11,36 +11,28 @@ const triggerPermissions: TriggerPermissions[] = [
         },
         roles: {
             blacklisted: [],
-            whitelisted: [
-                '380065303440392203' // officers
-            ]
+            whitelisted: []
         },
-        admins: ['302469039978971156'],
         permissionFlags: []
     },
     {
         triggers: ['panic'],
         channels: {
             blacklisted: [],
-            whitelisted: [
-                '*' // all channels allowed
-            ]
+            whitelisted: []
         },
         roles: {
             blacklisted: [],
-            whitelisted: [
-                '380065303440392203' // officers
-            ]
+            whitelisted: []
         },
-        admins: ['302469039978971156'],
         permissionFlags: []
     },
     {
-        triggers: ['eventSignupReaction'],
+        triggers: ['addEvent', 'eventSignupReaction'],
         channels: {
             blacklisted: [],
             whitelisted: [
-                '*' // all channels allowed
+                '469498651434287107' // #attendance
             ]
         },
         roles: {
@@ -49,8 +41,11 @@ const triggerPermissions: TriggerPermissions[] = [
                 '380065303440392203' // officers
             ]
         },
-        admins: ['302469039978971156'],
-        permissionFlags: []
+        permissionFlags: [],
+        options: {
+            requiredRoleName: 'Raider all',
+            outputChannel: 'attendance-log'
+        }
     },
     {
         triggers: ['deleteMessageReaction'],
@@ -66,7 +61,6 @@ const triggerPermissions: TriggerPermissions[] = [
                 '380065303440392203' // officers
             ]
         },
-        admins: [],
         permissionFlags: ['MANAGE_MESSAGES']
     }
 ];

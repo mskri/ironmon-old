@@ -8,15 +8,13 @@ import {
     ReactionEmoji,
     Emoji
 } from 'discord.js';
-import { TriggerPermissions, Command, ReactionListener } from '../typings';
+import { TriggerConfig, Command, ReactionListener } from '../typings';
+import configs from '../configs/trigger-permissions';
 
 // TODO: make logging better, maybe util function? Now e.g. user's details need to be parsed multiple times
 
-export const findTriggerPermissions = (
-    triggerPermissions: TriggerPermissions[],
-    triggerName: string
-): TriggerPermissions | undefined => {
-    return triggerPermissions.find(conf => conf.triggers.includes(triggerName));
+export const getTriggerConfig = (guildId: string, triggerName: string): TriggerConfig | null => {
+    return configs[guildId].find(conf => conf.triggers.includes(triggerName)) || null;
 };
 
 export const findMatchingCommand = (commands: Command[], message: string): Command | undefined => {
