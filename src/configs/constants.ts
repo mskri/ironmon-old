@@ -1,1 +1,1 @@
-export const timestampFormat = 'YYYY-MM-DDTHH:mmZ';
+export const timeZone = 'Europe/Berlin';

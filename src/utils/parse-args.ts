@@ -1,6 +1,4 @@
-import * as dayjs from 'dayjs';
-import { Dayjs } from 'dayjs';
-import { timestampFormat } from '../configs/constants';
+import { parseISO, isValid } from 'date-fns';
 
 declare global {
     interface String {
@@ -14,15 +12,15 @@ String.prototype.indexOfRegex = function(regex: RegExp) {
 };
 
 // Converts the value to boolean/number if they can be otherwise returns them as string
-const convertIfApplicable = (value: any): string | number | boolean | Dayjs => {
+const convertIfApplicable = (value: any): string | number | boolean | Date => {
     if (isNaN(value)) {
         const isBooleanTrue = value.toLowerCase() === 'true';
         const isBooleanFalse = value.toLowerCase() === 'false';
-        const isDate = dayjs(value, timestampFormat).isValid();
+        const isDate = isValid(parseISO(value));
 
         if (isBooleanTrue) return true;
         if (isBooleanFalse) return false;
-        if (isDate) return dayjs(value, timestampFormat).utc();
+        if (isDate) return parseISO(value);
     } else {
         return Number(value);
     }
@@ -57,10 +55,10 @@ const processargvify = (input: string): string[] => {
         .filter(o => o.trim().length > 0); // Filter out blanks and spaces
 };
 
-export const parseArgs = (input: string, defaults: object): { [key: string]: string | boolean | number | Dayjs } => {
+export const parseArgs = (input: string, defaults: object): { [key: string]: string | boolean | number | Date } => {
     const argKeyRegExp = /^--\w+/;
     let args = processargvify(input.trim());
-    let props: { [key: string]: string | boolean | number | Dayjs } = {};
+    let props: { [key: string]: string | boolean | number | Date } = {};
 
     for (let i = 0; i < args.length; i++) {
         const current = args[i];

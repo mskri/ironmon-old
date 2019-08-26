@@ -1,32 +1,18 @@
-import * as dayjs from 'dayjs';
-import * as customParseFormat from 'dayjs/plugin/customParseFormat';
-import * as relativeTime from 'dayjs/plugin/relativeTime';
-import * as utc from 'dayjs/plugin/utc';
-import { UnitType, Dayjs } from 'dayjs';
 import { RichEmbed, Message, GuildMember } from 'discord.js';
-import { AttendanceEvent, InputArgs, Duration, SignupStatus } from '../../typings';
-import { timestampFormat } from '../../configs/constants';
+import { AttendanceEvent, InputArgs, SignupStatus } from '../../typings';
 import { fetchLastEventId } from '../../database/events';
+import { addHours, addMinutes, differenceInHours, differenceInMinutes, subHours } from 'date-fns';
+import { formatToTimeZone } from 'date-fns-timezone';
+import { timeZone } from '../../configs/constants';
 
-dayjs.extend(customParseFormat);
-dayjs.extend(relativeTime);
-dayjs.extend(utc);
-
-export const dayjsToTimezone = (date?: Dayjs): Dayjs => {
-    if (!date) return;
-    // TODO: improve timezone output
-    // Add 2 hours because the timestamp is parsed to utc and Europe/Berlin is +2
-    return date.add(2, 'hour');
-};
-
-const getDurationAdditions = (duration: string): Duration[] => {
+const parseDurationAdditions = (duration: string): [number, string][] => {
     const additionParams = duration.split(' ');
-    const output: Duration[] = [];
+    const output: [number, string][] = [];
 
     additionParams.forEach((param: string) => {
         const indexOfFirstChar: number = param.indexOfRegex(/[a-zA-Z]/);
         const time: number = parseInt(param.slice(0, indexOfFirstChar));
-        const type: UnitType = <UnitType>param.slice(indexOfFirstChar);
+        const type: string = param.slice(indexOfFirstChar);
 
         output.push([time, type]);
     });
@@ -34,11 +20,17 @@ const getDurationAdditions = (duration: string): Duration[] => {
     return output;
 };
 
-const calculateEndTime = (startTime: Dayjs, duration: string): Dayjs => {
-    const additions: Duration[] = getDurationAdditions(duration);
-    let endTime = startTime;
+const calculateEndTime = (startTime: Date, duration: string): Date => {
+    const additions: [number, string][] = parseDurationAdditions(duration);
+    let endTime: Date = startTime;
 
-    additions.forEach(time => (endTime = endTime.add(time[0], time[1])));
+    additions.forEach(time => {
+        if (time[1] === 'h') {
+            endTime = addHours(endTime, time[0]);
+        } else if (time[1] === 'm') {
+            endTime = addMinutes(endTime, time[0]);
+        }
+    });
 
     return endTime;
 };
@@ -52,17 +44,16 @@ export const createEvent = async (args: InputArgs, message: Message): Promise<At
     const { member, guild, channel } = message;
     const { title, details, start, duration, color, url } = args;
 
-    const end: Dayjs = calculateEndTime(start!, duration!);
-
     const userId: string = member.id;
     const guildId: string = guild.id;
     const channelId: string = channel.id;
-    const startTime: string = dayjsToTimezone(start).format(timestampFormat);
-    const endTime: string = dayjsToTimezone(end).format(timestampFormat);
-    const description: string = getDetails(start!, end, details!);
+    const startTime: Date = start;
+    const endTime: Date = calculateEndTime(startTime, duration);
+    const description: string = createDescriptionText(startTime, endTime, details);
+
     const rowId: number = await fetchLastEventId();
 
-    return <AttendanceEvent>{
+    return {
         rowId,
         title,
         description,
@@ -77,21 +68,21 @@ export const createEvent = async (args: InputArgs, message: Message): Promise<At
     };
 };
 
-export const getDetails = (startTime: Dayjs, endTime: Dayjs, description: string): string => {
-    const date: string = dayjsToTimezone(startTime).format('dddd DD/MM');
-    const startHours: string = dayjsToTimezone(startTime).format('HH:mm');
-    const endHours: string = dayjsToTimezone(endTime).format('HH:mm');
-    const durationText: string = getDuration(startTime, endTime);
-    const paragraph: string = `${date} from ${startHours} to ${endHours} server time (${durationText})`;
+export const createDescriptionText = (startTime: Date, endTime: Date, description: string): string => {
+    const date: string = formatToTimeZone(startTime, 'dddd DD/MM', { timeZone });
+    const startHours: string = formatToTimeZone(startTime, 'HH:mm', { timeZone });
+    const endHours: string = formatToTimeZone(endTime, 'HH:mm', { timeZone });
+    const duration: string = getDurationText(startTime, endTime);
+    const paragraph: string = `${date} from ${startHours} to ${endHours} server time (${duration})`;
 
     return [paragraph, description].join('\n\n');
 };
 
-export const getDuration = (start: Dayjs, end: Dayjs): string => {
-    const differenceInHours = end.diff(start, 'hour');
-    const differenceInMinutes = end.subtract(differenceInHours, 'hour').diff(start, 'minute');
-    const hours = differenceInHours ? `${differenceInHours} hours` : null;
-    const minutes = differenceInMinutes ? `${differenceInMinutes} minutes` : null;
+export const getDurationText = (start: Date, end: Date): string => {
+    const diffInHours: number = differenceInHours(end, start);
+    const differMinutes: number = differenceInMinutes(subHours(end, diffInHours), start);
+    const hours = diffInHours ? `${diffInHours} hours` : null;
+    const minutes = differMinutes ? `${differMinutes} minutes` : null;
 
     return [hours, minutes].join(' ').trim();
 };

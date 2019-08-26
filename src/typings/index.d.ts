@@ -1,5 +1,4 @@
 import { WSEventType, Message, User, MessageReaction, Client, GuildMember, Emoji, PermissionString } from 'discord.js';
-import { Dayjs, UnitType } from 'dayjs';
 
 export type TriggerConfig = {
     triggers: string[];
@@ -75,23 +74,20 @@ export type Reaction = {
 };
 
 export type InputArgs = {
-    title?: string;
-    details?: string;
-    color?: string;
-    start?: Dayjs;
-    duration?: string;
-    users?: boolean;
-    url?: string;
+    title: string;
+    details: string;
+    color: string;
+    start: Date;
+    duration: string;
+    url: string;
 };
-
-export type Duration = [number, UnitType];
 
 export type AttendanceEvent = {
     rowId: number;
     title: string;
     description: string;
-    startTime: string;
-    endTime: string;
+    startTime: Date;
+    endTime: Date;
     color: string;
     url: string;
     userId: string;

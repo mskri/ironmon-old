@@ -8,6 +8,7 @@ import { saveUser, checkIfUserExists } from '../../database/users';
 import { saveEvent } from '../../database/events';
 import { createEvent, createEventEmbed } from './attendance-helpers';
 import { sendErrorToChannel, getMembersWithRoleSorted } from '../helpers';
+import { isValid } from 'date-fns';
 
 const requiredRole = 'Raider all'; // TODO: change to better one
 const requiredArgs = ['title', 'start', 'duration'];
@@ -29,7 +30,7 @@ export default createCommand({
 
             // Remove the command part, .e.g '!add', from beginning of the message
             const input: string = content.replace(/^!\w+\s/, '').trim();
-            const args: InputArgs = parseArgs(input, defaultArgs);
+            const args: InputArgs = <InputArgs>parseArgs(input, defaultArgs); // TODO: refactoring required
             const missingKeys: string[] = findMissingKeys(requiredArgs, args);
             const { start, color } = args;
 
@@ -37,7 +38,7 @@ export default createCommand({
                 throw `Missing following arguments: ${missingKeys.join(', ')}`;
             }
 
-            if (start && !start.isValid()) {
+            if (start && !isValid(new Date())) {
                 throw new Error('Invalid start time format');
             }
 
