@@ -23,7 +23,7 @@ export const isInAllowedChannel = (
     }
 
     // If whitelisted and blacklisted channels are both empty every channel should be allowed
-    if (whitelisted[0].length === 0 && blacklisted.length === 0) {
+    if (whitelisted.length === 0 && blacklisted.length === 0) {
         console.log(`All channels allowed`);
         return true;
     }
@@ -63,7 +63,7 @@ export const authorHasRole = (author: GuildMember, roles: PermissionRoles): bool
     }
 
     // If whitelisted and blacklisted roles are both empty allow all roles
-    if (whitelisted[0].length === 0 && blacklisted.length !== 0) {
+    if (whitelisted.length === 0 && blacklisted.length === 0) {
         console.log(`All roles are allowed`);
         return true;
     }
