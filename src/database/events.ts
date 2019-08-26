@@ -4,7 +4,7 @@ import gql from 'graphql-tag';
 
 const TAG = 'database/events';
 
-export const saveEvent = async (event: AttendanceEvent, messageId: string): Promise<number> => {
+export const saveEvent = async (event: AttendanceEvent, messageId: string): Promise<number | null> => {
     const variables = Object.assign(event, { messageId });
 
     try {
