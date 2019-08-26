@@ -10,7 +10,7 @@ import { createEvent, createEventEmbed } from './attendance-helpers';
 import { sendErrorToChannel, getMembersWithRoleSorted } from '../helpers';
 import { isValid } from 'date-fns';
 
-const requiredRole = 'Raider all'; // TODO: change to better one
+const requiredRole = 'Mythic team'; // TODO: change to better one
 const requiredArgs = ['title', 'start', 'duration'];
 const defaultArgs = {
     color: '#000000',

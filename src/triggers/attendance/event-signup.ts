@@ -6,7 +6,7 @@ import { saveSingup, updateSignupStatus, getSignupsForEventByEventId } from '../
 import { upsertUser } from '../../database/users';
 import { createEmbedFields, createSignupNoticeEmbed } from './attendance-helpers';
 
-const requiredRole = 'Raider all';
+const requiredRole = 'Mythic team'; // TODO: move to db (has to be in sync with !add-event)
 const logChannel = 'attendance-log';
 const statusColorMap = new Map<SignupStatus, number>([['accepted', 0x69e4a6], ['declined', 0xff7285]]);
 
