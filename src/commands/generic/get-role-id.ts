@@ -7,14 +7,16 @@ export default createCommand({
     name: 'getRoleId',
     trigger: /^!role-id/,
     execute: (message: Message) => {
-        const roleNameToSearchFor = message.content.replace(/^!\w+\s/, '');
+        const roleNameToSearch = message.content.replace(/^![a-zA-Z-]+\b/, '').trim();
         const channel = <TextChannel>message.channel;
-        const role = channel.guild.roles.find(role => role.name.toLowerCase() === roleNameToSearchFor.toLowerCase());
+        const role = channel.guild.roles.find(role => role.name.toLowerCase() === roleNameToSearch.toLowerCase());
+
+        let result = 'No such role found';
 
         if (role) {
-            sendToChannel(message.channel, role.id);
-        } else {
-            sendToChannel(message.channel, 'No such role found');
+            result = `ID for role "${roleNameToSearch}" is ${role.id}`;
         }
+
+        sendToChannel(message.channel, result);
     }
 });

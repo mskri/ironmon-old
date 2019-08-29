@@ -7,16 +7,16 @@ export default createCommand({
     name: 'getEmojiId',
     trigger: /^!emoji-id/,
     execute: (message: Message) => {
-        const reactionNameToSearchFor: string = message.content.replace(/^!\w+\s/, '');
+        const emojiNameToSearch: string = message.content.replace(/^![a-zA-Z-]+\b/, '').trim();
         const channel = <TextChannel>message.channel;
-        const emoji = channel.guild.emojis.find(emoji => emoji.name === reactionNameToSearchFor);
+        const emoji = channel.guild.emojis.find(emoji => emoji.name === emojiNameToSearch);
 
-        let reply = 'No such emoji found';
+        let result = 'No such emoji found';
 
         if (emoji) {
-            reply = emoji.id;
+            result = `ID for "${emojiNameToSearch}" emoji is ${emoji.id}`;
         }
 
-        sendToChannel(message.channel, reply);
+        sendToChannel(message.channel, result);
     }
 });
