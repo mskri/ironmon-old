@@ -1,13 +1,5 @@
-import {
-    Message,
-    PermissionString,
-    GuildMember,
-    TextChannel,
-    DMChannel,
-    GroupDMChannel,
-    WSEventType
-} from 'discord.js';
-import { Command, Action, CommandConfig, PermissionRoles, PermissionChannels, ReactionMeta } from '../typings';
+import { DMChannel, GroupDMChannel, GuildMember, Message, PermissionString, TextChannel } from 'discord.js';
+import { PermissionChannels, PermissionRoles, CommandConfig, Action, Command, ActionEvent } from '../typings';
 
 const getRolesOfGuildMember = (member: GuildMember): string[] => Array.from(member.roles.keys());
 
@@ -86,26 +78,25 @@ export const authorHasRole = (author: GuildMember, roles: PermissionRoles): bool
 export const createCommand = (command: Command): Command => command;
 
 export const createAction = (opts: {
-    eventType: WSEventType;
+    event: ActionEvent;
     config: CommandConfig;
     author: GuildMember;
     message: Message;
     action: Command;
-    reactionMeta?: ReactionMeta;
 }): Action => {
-    const { eventType, author, message, action, reactionMeta } = opts;
+    const { event, author, message, action } = opts;
 
-    const executeOnAddReaction = (action: Command, reactionMeta?: ReactionMeta): void => {
-        if (action.onAddReaction && reactionMeta) {
+    const executeOnAddReaction = (action: Command, event?: ActionEvent): void => {
+        if (action.onAddReaction && event) {
             console.log('Execute onAddReaction');
-            action.onAddReaction(message, reactionMeta, author);
+            action.onAddReaction(message, event, author);
         }
     };
 
-    const executeOnRemoveReaction = (action: Command, reactionMeta?: ReactionMeta): void => {
-        if (action.onRemoveReaction && reactionMeta) {
+    const executeOnRemoveReaction = (action: Command, event?: ActionEvent): void => {
+        if (action.onRemoveReaction && event) {
             console.log('Execute onRemoveReaction');
-            action.onRemoveReaction(message, reactionMeta, author);
+            action.onRemoveReaction(message, event, author);
         }
     };
 
@@ -117,12 +108,12 @@ export const createAction = (opts: {
     };
 
     const execute = () => {
-        switch (eventType) {
+        switch (event.type) {
             case 'MESSAGE_REACTION_ADD':
-                executeOnAddReaction(action, reactionMeta);
+                executeOnAddReaction(action, event);
                 break;
             case 'MESSAGE_REACTION_REMOVE':
-                executeOnRemoveReaction(action, reactionMeta);
+                executeOnRemoveReaction(action, event);
                 break;
             case 'MESSAGE_CREATE':
                 executeOnMessage(action, message);
