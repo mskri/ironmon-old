@@ -4,9 +4,7 @@ Ironmon, a discord bot written with TypeScript.
 
 ## Development
 
-### Local development
-
-#### Setting up .env file
+### Setting up .env file
 
 For the bot tos start up properly you need to have `.env` file. Look into `.env.example`. Copy it and rename it then to `.env`.
 
@@ -19,7 +17,7 @@ For the bot tos start up properly you need to have `.env` file. Look into `.env.
 \* You can get the secret authorization by following this, [Create a Discord bot under 15 minutes](https://thomlom.dev/create-a-discord-bot-under-15-minutes/), guide from the "Get that token"-step.  
 \*\* Find out how to get your Discord ID from the [official documentation](https://support.discordapp.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-).
 
-#### Database
+### Database
 
 This project uses [Postgraphile](https://www.graphile.org/postgraphile/) to run GraphQL server for basic database operations. PostgreSQL schema can be found in `database/db.sql`. Create new database and execute the `db.sql` on it.
 
@@ -31,7 +29,7 @@ postgraphile -c postgres://<username>:<password>@localhost:5432/<database> -a -j
 
 _Remember to point the `GRAPHQL_URL` in the `.env` file to localhost and correct database!_
 
-#### Running the bot
+### Run locally in dev mode
 
 Install dependencies
 
@@ -45,15 +43,15 @@ Start bot in dev mode
 npm run dev
 ```
 
-### Running in production
+## Production
 
-#### Locally
+### Run locally in production mode
 
 ```bash
 npm run prod
 ```
 
-#### With PM2
+### Run with PM2
 
 TBA
 
