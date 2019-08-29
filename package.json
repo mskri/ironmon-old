@@ -12,6 +12,7 @@
         "lint:fix": "eslint --ext .js . --fix"
     },
     "dependencies": {
+        "@types/dotenv-safe": "^5.0.3",
         "@typescript-eslint/eslint-plugin": "^1.13.0",
         "@typescript-eslint/parser": "^1.13.0",
         "apollo-cache-inmemory": "^1.6.2",
@@ -24,6 +25,7 @@
         "discord.js": "^11.5.1",
         "graphql": "^14.4.2",
         "graphql-tag": "^2.10.1",
+        "rx-queue": "^0.8.5",
         "typescript": "^3.5.3"
     },
     "devDependencies": {
