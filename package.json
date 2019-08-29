@@ -8,6 +8,7 @@
         "start": "npm run dev",
         "test": "echo \"Error: no test specified\" && exit 1",
         "dev": "cross-env NODE_ENV=development ts-node-dev --clear --ignore-watch node_modules src/index.ts",
+        "prod": "cross-env NODE_ENV=production tsc && node dist/index.js",
         "lint": "eslint --ext .js .",
         "lint:fix": "eslint --ext .js . --fix"
     },
