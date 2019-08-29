@@ -4,8 +4,6 @@ Ironmon, a discord bot written with TypeScript.
 
 ## Development
 
-### Discrod bot token
-
 ### Local development
 
 #### Setting up .env file
