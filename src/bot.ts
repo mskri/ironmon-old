@@ -70,14 +70,12 @@ export const onRaw = async (client: Client, event: any) => {
 
     // Get the message and emoji's from it (reactions) - Note: fetches only message from text channel!
     const message: Message = await (<TextChannel>channel).fetchMessage(data.message_id);
-    const guild = client.guilds.get(data.guild_id);
-    if (!guild) return;
-
-    const author = guild.members.find(member => member.id === user.id);
+    const guild: Guild = client.guilds.get(data.guild_id)!;
+    const author: GuildMember = guild.members.find(member => member.id === user.id);
     const emojiKey: string = data.emoji.id ? `${data.emoji.name}:${data.emoji.id}` : data.emoji.name;
     const emojiName: string = data.emoji.name;
 
-    let reaction = <MessageReaction>message.reactions.get(emojiKey);
+    let reaction = message.reactions.get(emojiKey);
     if (!reaction) {
         // Reaction was not found in cache
         const emoji = new Emoji(guild, data.emoji);
