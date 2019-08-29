@@ -8,32 +8,37 @@ import {
     ReactionEmoji,
     Emoji
 } from 'discord.js';
-import { TriggerConfig, Trigger, ReactionListener } from '../typings';
+import { Command, CommandConfig } from '../typings';
 
 // TODO: make logging better, maybe util function? Now e.g. user's details need to be parsed multiple times
 
-export const getTriggerConfig = (
-    configs: { [key: string]: TriggerConfig[] },
+export const getActionConfig = (
+    configs: { [key: string]: CommandConfig[] },
     guildId: string,
     triggerName: string
-): TriggerConfig | undefined => {
+): CommandConfig | undefined => {
     return configs[guildId].find(conf => conf.triggers.includes(triggerName));
 };
 
-export const getMatchingTrigger = (triggers: Trigger[], message: string): Trigger | undefined => {
-    return triggers.find(trigger => {
-        const isRegExp = trigger.trigger instanceof RegExp;
-        if (!isRegExp) return false;
-        return trigger.trigger.test(message);
+export const getMessageTrigger = (actions: Command[], message: string): Command | undefined => {
+    const messageTriggers = actions.filter(action => action.type === 'MESSAGE');
+
+    if (!messageTriggers) return;
+
+    return messageTriggers.find(action => {
+        const hasTrigger = action.trigger && action.trigger instanceof RegExp;
+        if (!hasTrigger) return false;
+        return action.trigger!.test(message);
     });
 };
 
-export const getMatchingReactionListener = (
-    reactions: ReactionListener[],
-    emoji: Emoji | ReactionEmoji
-): ReactionListener | undefined => {
-    return reactions.find(item => {
-        const { reactions } = item;
+export const getReactionListener = (actions: Command[], emoji: Emoji | ReactionEmoji): Command | undefined => {
+    const reactionListeners = actions.filter(action => action.type === 'REACTION');
+
+    if (!reactionListeners) return;
+
+    return reactionListeners.find(action => {
+        const { reactions } = action;
         if (!reactions) return false;
 
         // Can we find matching reaction by id or name

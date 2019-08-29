@@ -55,7 +55,7 @@ npm run prod
 
 TBA
 
-## Creating new triggers
+## Creating new commands
 
 ### Actions triggered by certain word(s) appearing on a message
 

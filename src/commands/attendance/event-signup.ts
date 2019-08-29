@@ -1,6 +1,6 @@
 import { Message, TextChannel, Guild, GuildMember, RichEmbed } from 'discord.js';
 import { ReactionMeta, Signup, SignupStatus } from '../../typings';
-import { createReactionListener } from '../factory';
+import { createCommand } from '../factory';
 import { getMembersWithRoleSorted, sendToChannel, editMessage } from '../helpers';
 import { saveSingup, updateSignupStatus, getSignupsForEventByEventId } from '../../database/signups';
 import { upsertUser } from '../../database/users';
@@ -40,7 +40,8 @@ const getNoStatusSignups = (signups: Signup[], membersInChannel: GuildMember[], 
         .sort(displayNameAlphabetically);
 };
 
-export default createReactionListener({
+export default createCommand({
+    type: 'REACTION',
     name: 'eventSignupReaction',
     reactions: [
         'accepted', // :accepted:

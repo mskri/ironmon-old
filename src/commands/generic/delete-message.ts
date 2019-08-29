@@ -1,7 +1,8 @@
 import { Message } from 'discord.js';
-import { createReactionListener } from '../factory';
+import { createCommand } from '../factory';
 
-export default createReactionListener({
+export default createCommand({
+    type: 'REACTION',
     name: 'deleteMessageReaction',
     reactions: [
         '❌' // :x:

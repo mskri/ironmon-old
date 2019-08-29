@@ -1,8 +1,9 @@
 import { Message } from 'discord.js';
-import { createTrigger } from '../factory';
 import { OWNER_ID } from '../../configs/env';
+import { createCommand } from '../factory';
 
-export default createTrigger({
+export default createCommand({
+    type: 'MESSAGE',
     name: 'panic',
     trigger: /^!panic/,
     execute: (message: Message) => {

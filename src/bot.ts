@@ -1,9 +1,9 @@
-import { Client, Message, MessageReaction, Emoji, TextChannel, Guild, WSEventType, GuildMember } from 'discord.js';
+import { Client, Message, MessageReaction, Emoji, TextChannel, Guild, GuildMember } from 'discord.js';
 import { ReactionMeta } from './typings';
-import { createTriggerEvent } from './triggers/factory';
-import { eventQueue } from './triggers/queue';
-import { getMatchingTrigger, getMatchingReactionListener, getTriggerConfig } from './triggers/helpers';
-import { triggers, reactions } from './triggers';
+import { createAction } from './commands/factory';
+import { actionQueue } from './commands/queue';
+import { getMessageTrigger, getReactionListener, getActionConfig } from './commands/helpers';
+import actions from './commands/actions';
 import preventDM from './utils/prevent-dm';
 import configs from './configs/trigger-permissions';
 
@@ -38,22 +38,22 @@ export const onMessage = (client: Client, message: Message) => {
 
     // Check if the message matches any triggers (commands)
     // Triggers are defined with regex and don't necessarily start with !command
-    const trigger = getMatchingTrigger(triggers, message.content);
-    if (!trigger) return;
+    const messageTrigger = getMessageTrigger(actions, message.content);
+    if (!messageTrigger) return;
 
-    const config = getTriggerConfig(configs, message.guild.id, trigger.name);
+    const config = getActionConfig(configs, message.guild.id, messageTrigger.name);
     if (!config) return;
 
     const author: GuildMember = message.member;
-    const messageTrigger = createTriggerEvent({
+    const action = createAction({
         eventType: 'MESSAGE_CREATE',
         config,
         author,
         message,
-        trigger
+        action: messageTrigger
     });
 
-    eventQueue.next(messageTrigger);
+    actionQueue.next(action);
 };
 
 export const onRaw = async (client: Client, event: any) => {
@@ -67,7 +67,7 @@ export const onRaw = async (client: Client, event: any) => {
 
     // Ignore bots reactions and reactions on other channels than text
     // Reactions in DMs will have undefined channel
-    if (user.bot || !channel || channel.type != 'text') return;
+    if (user.bot || !channel || channel.type !== 'text') return;
 
     // Get the message and emoji's from it (reactions) - Note: fetches only message from text channel!
     const message: Message = await (<TextChannel>channel).fetchMessage(data.message_id);
@@ -85,7 +85,7 @@ export const onRaw = async (client: Client, event: any) => {
         reaction = new MessageReaction(message, emoji, 1, originatingFromMe);
     }
 
-    const reactionListener = getMatchingReactionListener(reactions, reaction.emoji);
+    const reactionListener = getReactionListener(actions, reaction.emoji);
     if (!reactionListener) return;
 
     const reactionMeta: ReactionMeta = {
@@ -93,17 +93,17 @@ export const onRaw = async (client: Client, event: any) => {
         emojiName: data.emoji.name
     };
 
-    const config = getTriggerConfig(configs, guild.id, reactionListener.name);
+    const config = getActionConfig(configs, guild.id, reactionListener.name);
     if (!config) return;
 
-    const listenerEvent = createTriggerEvent({
-        eventType: <WSEventType>event.t,
+    const action = createAction({
+        eventType: event.t,
         config,
         author,
         message,
-        reactionListener,
+        action: reactionListener,
         reactionMeta
     });
 
-    eventQueue.next(listenerEvent);
+    actionQueue.next(action);
 };

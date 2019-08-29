@@ -1,6 +1,6 @@
 import { WSEventType, Message, User, MessageReaction, Client, GuildMember, Emoji, PermissionString } from 'discord.js';
 
-export type TriggerConfig = {
+export type CommandConfig = {
     triggers: string[];
     channels: PermissionChannels;
     roles: PermissionRoles;
@@ -20,40 +20,27 @@ export type PermissionRoles = {
     whitelisted: string[];
 };
 
-export type TriggerEvent = {
+export type Action = {
     eventType: WSEventType;
-    config: TriggerConfig;
+    config: CommandConfig;
     author: GuildMember;
     message: Message;
-    trigger?: Trigger;
-    reactionListener?: ReactionListener;
-    reactionMeta?: ReactionMeta;
     execute: () => void;
 };
 
-export type TriggerOpts = {
-    eventType: WSEventType;
-    config: TriggerConfig;
-    author: GuildMember;
-    message: Message;
-    trigger?: Trigger;
-    reactionListener?: ReactionListener;
-    reactionMeta?: ReactionMeta;
-};
+export type ActionType = 'MESSAGE' | 'REACTION';
 
-export type Trigger = {
+export type Command = {
+    type: ActionType;
     name: string;
-    trigger: RegExp;
-    execute: (message: Message) => void;
-};
-
-export type ReactionListener = {
-    name: string;
-    reactions: string[];
+    trigger?: RegExp;
+    reactions?: string[];
+    execute?: (message: Message) => void;
     onAddReaction?: (message: Message, meta: ReactionMeta, author: GuildMember) => Promise<void> | void;
     onRemoveReaction?: (message: Message, meta: ReactionMeta, author: GuildMember) => Promise<void> | void;
 };
 
+// TODO: change to generic "event meta" object?
 export type ReactionMeta = {
     reaction: MessageReaction;
     emojiName: string;
@@ -64,13 +51,6 @@ export type DiscordUser = {
     username: string;
     discriminator: string;
     displayName: string;
-};
-
-export type Reaction = {
-    id: string;
-    name: string;
-    category: string;
-    color: number;
 };
 
 export type InputArgs = {

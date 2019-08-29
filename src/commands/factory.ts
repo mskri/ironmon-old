@@ -1,13 +1,13 @@
-import { Message, PermissionString, GuildMember, TextChannel, DMChannel, GroupDMChannel } from 'discord.js';
 import {
-    Trigger,
-    TriggerEvent,
-    ReactionListener,
-    PermissionRoles,
-    PermissionChannels,
-    TriggerOpts,
-    ReactionMeta
-} from '../typings';
+    Message,
+    PermissionString,
+    GuildMember,
+    TextChannel,
+    DMChannel,
+    GroupDMChannel,
+    WSEventType
+} from 'discord.js';
+import { Command, Action, CommandConfig, PermissionRoles, PermissionChannels, ReactionMeta } from '../typings';
 
 const getRolesOfGuildMember = (member: GuildMember): string[] => Array.from(member.roles.keys());
 
@@ -35,6 +35,7 @@ export const isInAllowedChannel = (
         return true;
     }
 
+    console.log('Not allowed in channel');
     return false;
 };
 
@@ -80,46 +81,51 @@ export const authorHasRole = (author: GuildMember, roles: PermissionRoles): bool
     return false;
 };
 
-// TODO: this is just for visual convenience so you can do createTrigger({...}). Could be removed?
-export const createTrigger = (trigger: Trigger): Trigger => trigger;
+// TODO: this is just for visual convenience so you can do createCommand({...}). Could be removed?
+// Once configs per command are in database combine the configuration with the command here and pass it along?
+export const createCommand = (command: Command): Command => command;
 
-// TODO: this is just for visual convenience so you can do createReactionListener({...}). Could be removed?
-export const createReactionListener = (reactionListener: ReactionListener): ReactionListener => reactionListener;
+export const createAction = (opts: {
+    eventType: WSEventType;
+    config: CommandConfig;
+    author: GuildMember;
+    message: Message;
+    action: Command;
+    reactionMeta?: ReactionMeta;
+}): Action => {
+    const { eventType, author, message, action, reactionMeta } = opts;
 
-export const createTriggerEvent = (opts: TriggerOpts): TriggerEvent => {
-    const { eventType, author, message, trigger, reactionListener, reactionMeta } = opts;
-
-    const executeOnAddReaction = (reactionListener?: ReactionListener, reactionMeta?: ReactionMeta) => {
-        if (reactionListener && reactionListener.onAddReaction && reactionMeta) {
-            console.log('Triggered onAddReaction');
-            reactionListener.onAddReaction(message, reactionMeta, author);
+    const executeOnAddReaction = (action: Command, reactionMeta?: ReactionMeta): void => {
+        if (action.onAddReaction && reactionMeta) {
+            console.log('Execute onAddReaction');
+            action.onAddReaction(message, reactionMeta, author);
         }
     };
 
-    const executeOnRemoveReaction = (reactionListener?: ReactionListener, reactionMeta?: ReactionMeta) => {
-        if (reactionListener && reactionListener.onRemoveReaction && reactionMeta) {
-            console.log('Triggered onRemoveReaction');
-            reactionListener.onRemoveReaction(message, reactionMeta, author);
+    const executeOnRemoveReaction = (action: Command, reactionMeta?: ReactionMeta): void => {
+        if (action.onRemoveReaction && reactionMeta) {
+            console.log('Execute onRemoveReaction');
+            action.onRemoveReaction(message, reactionMeta, author);
         }
     };
 
-    const executeOnMessage = (messageTrigger?: Trigger, message?: Message) => {
-        if (messageTrigger && messageTrigger.execute && message) {
-            console.log('Triggered onMessage');
-            messageTrigger.execute(message);
+    const executeOnMessage = (action: Command, message: Message): void => {
+        if (action.execute && message) {
+            console.log('Execute onMessage');
+            action.execute(message);
         }
     };
 
     const execute = () => {
         switch (eventType) {
             case 'MESSAGE_REACTION_ADD':
-                executeOnAddReaction(reactionListener, reactionMeta);
+                executeOnAddReaction(action, reactionMeta);
                 break;
             case 'MESSAGE_REACTION_REMOVE':
-                executeOnRemoveReaction(reactionListener, reactionMeta);
+                executeOnRemoveReaction(action, reactionMeta);
                 break;
             case 'MESSAGE_CREATE':
-                executeOnMessage(trigger, message);
+                executeOnMessage(action, message);
         }
     };
 

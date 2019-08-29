@@ -1,6 +1,6 @@
 import { AttendanceEvent, InputArgs } from '../../typings';
 import { Message, TextChannel, RichEmbed, GuildMember } from 'discord.js';
-import { createTrigger } from '../factory';
+import { createCommand } from '../factory';
 import { sendToChannel, editMessage } from '../helpers';
 import { parseArgs, findMissingKeys } from '../../utils/parse-args';
 import { isHexColorFormat } from '../../utils/validators';
@@ -21,7 +21,8 @@ const reactionstoAdd = [
     '481485649732698124' // :declined:
 ];
 
-export default createTrigger({
+export default createCommand({
+    type: 'MESSAGE',
     name: 'addEvent',
     trigger: /^!add-event/,
     execute: async (message: Message) => {

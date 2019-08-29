@@ -1,8 +1,9 @@
 import { Message, TextChannel } from 'discord.js';
 import { sendToChannel } from '../helpers';
-import { createTrigger } from '../factory';
+import { createCommand } from '../factory';
 
-export default createTrigger({
+export default createCommand({
+    type: 'MESSAGE',
     name: 'getRoleId',
     trigger: /^!role-id/,
     execute: (message: Message) => {

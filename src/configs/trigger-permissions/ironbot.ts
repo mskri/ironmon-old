@@ -1,13 +1,11 @@
-import { TriggerConfig } from '../../typings';
+import { CommandConfig } from '../../typings';
 
-const triggerPermissions: TriggerConfig[] = [
+const triggerPermissions: CommandConfig[] = [
     {
         triggers: ['sayHello', 'getChannelId', 'getEmojiId', 'getRoleId'],
         channels: {
             blacklisted: [],
-            whitelisted: [
-                '553627580540911727' // #test
-            ]
+            whitelisted: []
         },
         roles: {
             blacklisted: [],
