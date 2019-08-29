@@ -1,10 +1,11 @@
 import { Client, Message, MessageReaction, Emoji, TextChannel, Guild, WSEventType, GuildMember } from 'discord.js';
-import { Command, ReactionMeta, ReactionListener, TriggerConfig } from './typings';
-import { createCommandEvent } from './triggers/factory';
+import { ReactionMeta } from './typings';
+import { createTriggerEvent } from './triggers/factory';
 import { eventQueue } from './triggers/queue';
-import { findMatchingCommand, findMatchingReactionListener, getTriggerConfig } from './triggers/helpers';
-import { commands, reactions } from './triggers';
+import { getMatchingTrigger, getMatchingReactionListener, getTriggerConfig } from './triggers/helpers';
+import { triggers, reactions } from './triggers';
 import preventDM from './utils/prevent-dm';
+import configs from './configs/trigger-permissions';
 
 // Note: should match MESSAGE_REACTION_ADD or MESSAGE_REACTION_REMOVE from discord.js
 // if discord.js changes that they should be changed to reflect the new ones here too.
@@ -37,15 +38,20 @@ export const onMessage = (client: Client, message: Message) => {
 
     // Check if the message matches any triggers (commands)
     // Triggers are defined with regex and don't necessarily start with !command
-    const command: Command | undefined = findMatchingCommand(commands, message.content);
-    if (!command) return;
+    const trigger = getMatchingTrigger(triggers, message.content);
+    if (!trigger) return;
 
-    const config: TriggerConfig | null = getTriggerConfig(message.guild.id, command.name);
+    const config = getTriggerConfig(configs, message.guild.id, trigger.name);
     if (!config) return;
 
     const author: GuildMember = message.member;
-    const eventType: WSEventType = 'MESSAGE_CREATE';
-    const messageTrigger = createCommandEvent({ eventType, config, author, message, command });
+    const messageTrigger = createTriggerEvent({
+        eventType: 'MESSAGE_CREATE',
+        config,
+        author,
+        message,
+        trigger
+    });
 
     eventQueue.next(messageTrigger);
 };
@@ -79,7 +85,7 @@ export const onRaw = async (client: Client, event: any) => {
         reaction = new MessageReaction(message, emoji, 1, originatingFromMe);
     }
 
-    const reactionListener: ReactionListener | undefined = findMatchingReactionListener(reactions, reaction.emoji);
+    const reactionListener = getMatchingReactionListener(reactions, reaction.emoji);
     if (!reactionListener) return;
 
     const reactionMeta: ReactionMeta = {
@@ -87,12 +93,11 @@ export const onRaw = async (client: Client, event: any) => {
         emojiName: data.emoji.name
     };
 
-    const config: TriggerConfig | null = getTriggerConfig(guild.id, reactionListener.name);
+    const config = getTriggerConfig(configs, guild.id, reactionListener.name);
     if (!config) return;
 
-    const eventType = <WSEventType>event.t;
-    const listenerEvent = createCommandEvent({
-        eventType,
+    const listenerEvent = createTriggerEvent({
+        eventType: <WSEventType>event.t,
         config,
         author,
         message,

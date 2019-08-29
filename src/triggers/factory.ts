@@ -1,6 +1,6 @@
 import { Message, PermissionString, GuildMember, TextChannel, DMChannel, GroupDMChannel } from 'discord.js';
 import {
-    Command,
+    Trigger,
     TriggerEvent,
     ReactionListener,
     PermissionRoles,
@@ -16,6 +16,7 @@ export const isInAllowedChannel = (
     channels: PermissionChannels
 ): boolean => {
     const { whitelisted, blacklisted } = channels;
+
     // Check if the channels message was sent is blacklisted
     if (blacklisted.some((channelId: string) => channelId == channel.id)) {
         console.error(`Channel ${channel.id} is blacklisted`);
@@ -38,6 +39,7 @@ export const isInAllowedChannel = (
 };
 
 export const authorHasPermissionFlags = (author: GuildMember, permissionFlags: PermissionString[]): boolean => {
+    // TODO: will crash app, should not!
     if (!permissionFlags) throw new Error('No required permissionsFlags defined');
     if (permissionFlags.length === 0) return true;
 
@@ -78,14 +80,14 @@ export const authorHasRole = (author: GuildMember, roles: PermissionRoles): bool
     return false;
 };
 
-// TODO: this is just for visual convenience so you can do createCommand({...}). Could be removed?
-export const createCommand = (command: Command): Command => command;
+// TODO: this is just for visual convenience so you can do createTrigger({...}). Could be removed?
+export const createTrigger = (trigger: Trigger): Trigger => trigger;
 
 // TODO: this is just for visual convenience so you can do createReactionListener({...}). Could be removed?
 export const createReactionListener = (reactionListener: ReactionListener): ReactionListener => reactionListener;
 
-export const createCommandEvent = (opts: TriggerOpts): TriggerEvent => {
-    const { eventType, author, message, command, reactionListener, reactionMeta } = opts;
+export const createTriggerEvent = (opts: TriggerOpts): TriggerEvent => {
+    const { eventType, author, message, trigger, reactionListener, reactionMeta } = opts;
 
     const executeOnAddReaction = (reactionListener?: ReactionListener, reactionMeta?: ReactionMeta) => {
         if (reactionListener && reactionListener.onAddReaction && reactionMeta) {
@@ -101,9 +103,9 @@ export const createCommandEvent = (opts: TriggerOpts): TriggerEvent => {
         }
     };
 
-    const executeOnMessage = (messageTrigger?: Command, message?: Message) => {
+    const executeOnMessage = (messageTrigger?: Trigger, message?: Message) => {
         if (messageTrigger && messageTrigger.execute && message) {
-            console.log('Triggered messageTrigger');
+            console.log('Triggered onMessage');
             messageTrigger.execute(message);
         }
     };
@@ -117,7 +119,7 @@ export const createCommandEvent = (opts: TriggerOpts): TriggerEvent => {
                 executeOnRemoveReaction(reactionListener, reactionMeta);
                 break;
             case 'MESSAGE_CREATE':
-                executeOnMessage(command, message);
+                executeOnMessage(trigger, message);
         }
     };
 

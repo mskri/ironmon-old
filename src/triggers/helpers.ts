@@ -8,37 +8,37 @@ import {
     ReactionEmoji,
     Emoji
 } from 'discord.js';
-import { TriggerConfig, Command, ReactionListener } from '../typings';
-import configs from '../configs/trigger-permissions';
+import { TriggerConfig, Trigger, ReactionListener } from '../typings';
 
 // TODO: make logging better, maybe util function? Now e.g. user's details need to be parsed multiple times
 
-export const getTriggerConfig = (guildId: string, triggerName: string): TriggerConfig | null => {
-    return configs[guildId].find(conf => conf.triggers.includes(triggerName)) || null;
+export const getTriggerConfig = (
+    configs: { [key: string]: TriggerConfig[] },
+    guildId: string,
+    triggerName: string
+): TriggerConfig | undefined => {
+    return configs[guildId].find(conf => conf.triggers.includes(triggerName));
 };
 
-export const findMatchingCommand = (commands: Command[], message: string): Command | undefined => {
-    return commands.find(command => (command.trigger instanceof RegExp ? command.trigger.test(message) : false));
+export const getMatchingTrigger = (triggers: Trigger[], message: string): Trigger | undefined => {
+    return triggers.find(trigger => {
+        const isRegExp = trigger.trigger instanceof RegExp;
+        if (!isRegExp) return false;
+        return trigger.trigger.test(message);
+    });
 };
 
-export const findMatchingReactionListener = (
+export const getMatchingReactionListener = (
     reactions: ReactionListener[],
     emoji: Emoji | ReactionEmoji
 ): ReactionListener | undefined => {
     return reactions.find(item => {
         const { reactions } = item;
-        return reactions ? reactions.includes(emoji.id) || reactions.includes(emoji.name) : false;
+        if (!reactions) return false;
+
+        // Can we find matching reaction by id or name
+        return reactions.includes(emoji.id) || reactions.includes(emoji.name);
     });
-};
-
-export const matchesTrigger = (trigger: RegExp | undefined, message: string): boolean => {
-    if (!trigger) return false;
-    return trigger instanceof RegExp ? trigger.test(message) : false;
-};
-
-export const matchesReaction = (reactions?: string[], emoji?: Emoji | ReactionEmoji): boolean => {
-    if (!reactions || !emoji) return false;
-    return reactions.includes(emoji.id) || reactions.includes(emoji.name);
 };
 
 export const sendToChannel = (
@@ -56,23 +56,22 @@ export const sendErrorToChannel = (channel: TextChannel | DMChannel | GroupDMCha
 };
 
 export const editMessage = (message: Message, embed: string | RichEmbed) => {
-    return message.edit(embed);
+    return message.edit(embed).catch(error => console.error(error));
 };
 
 export const getRolesOfGuildMember = (member: GuildMember): string[] => {
     return Array.from(member.roles.keys());
 };
 
-export function getMembersWithRole(members: GuildMember[], withRole: string) {
+export const getMembersWithRole = (members: GuildMember[], requiredRole: string): GuildMember[] => {
     return members.filter(member => {
         const isNotBot = !member.user.bot;
-        const hasRequiredRole = member.roles.some(role => role.name === withRole);
+        const hasRequiredRole = member.roles.some(role => role.name === requiredRole);
         return isNotBot && hasRequiredRole;
     });
-}
+};
 
-export const getMembersWithRoleSorted = (channel: TextChannel, requiredRoleName: string): GuildMember[] => {
-    return getMembersWithRole(channel.members.array(), requiredRoleName).sort(
-        (a: any, b: any) => a.username - b.username
-    );
+export const getMembersWithRoleSorted = (channel: TextChannel, requiredRole: string): GuildMember[] => {
+    const membersWithRole = getMembersWithRole(channel.members.array(), requiredRole);
+    return membersWithRole.sort((a: any, b: any) => a.username - b.username);
 };

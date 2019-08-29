@@ -1,8 +1,8 @@
 import { Message } from 'discord.js';
 import { sendToChannel } from '../helpers';
-import { createCommand } from '../factory';
+import { createTrigger } from '../factory';
 
-export default createCommand({
+export default createTrigger({
     name: 'getChannelId',
     trigger: /^!channel-id/,
     execute: (message: Message) => {

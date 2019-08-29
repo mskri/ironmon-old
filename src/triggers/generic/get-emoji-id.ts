@@ -1,8 +1,8 @@
 import { Message, TextChannel } from 'discord.js';
 import { sendToChannel } from '../helpers';
-import { createCommand } from '../factory';
+import { createTrigger } from '../factory';
 
-export default createCommand({
+export default createTrigger({
     name: 'getEmojiId',
     trigger: /^!emoji-id/,
     execute: (message: Message) => {
