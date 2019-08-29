@@ -1,5 +1,4 @@
 import { Client, Message, MessageReaction, Emoji, TextChannel, Guild, GuildMember } from 'discord.js';
-import { ReactionMeta } from './typings';
 import { createAction } from './commands/factory';
 import { actionQueue } from './commands/queue';
 import { getMessageTrigger, getReactionListener, getActionConfig } from './commands/helpers';
@@ -46,7 +45,7 @@ export const onMessage = (client: Client, message: Message) => {
 
     const author: GuildMember = message.member;
     const action = createAction({
-        eventType: 'MESSAGE_CREATE',
+        event: { type: 'MESSAGE_CREATE' },
         config,
         author,
         message,
@@ -76,6 +75,7 @@ export const onRaw = async (client: Client, event: any) => {
 
     const author = guild.members.find(member => member.id === user.id);
     const emojiKey: string = data.emoji.id ? `${data.emoji.name}:${data.emoji.id}` : data.emoji.name;
+    const emojiName: string = data.emoji.name;
 
     let reaction = <MessageReaction>message.reactions.get(emojiKey);
     if (!reaction) {
@@ -88,21 +88,19 @@ export const onRaw = async (client: Client, event: any) => {
     const reactionListener = getReactionListener(actions, reaction.emoji);
     if (!reactionListener) return;
 
-    const reactionMeta: ReactionMeta = {
-        reaction,
-        emojiName: data.emoji.name
-    };
-
     const config = getActionConfig(configs, guild.id, reactionListener.name);
     if (!config) return;
 
     const action = createAction({
-        eventType: event.t,
+        event: {
+            type: event.t,
+            reaction,
+            emojiName
+        },
         config,
         author,
         message,
-        action: reactionListener,
-        reactionMeta
+        action: reactionListener
     });
 
     actionQueue.next(action);

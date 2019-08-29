@@ -1,5 +1,5 @@
 import { Message, TextChannel, Guild, GuildMember, RichEmbed } from 'discord.js';
-import { ReactionMeta, Signup, SignupStatus } from '../../typings';
+import { ActionEvent, Signup, SignupStatus } from '../../typings';
 import { createCommand } from '../factory';
 import { getMembersWithRoleSorted, sendToChannel, editMessage } from '../helpers';
 import { saveSingup, updateSignupStatus, getSignupsForEventByEventId } from '../../database/signups';
@@ -7,7 +7,7 @@ import { upsertUser } from '../../database/users';
 import { createEmbedFields, createSignupNoticeEmbed } from './attendance-helpers';
 
 const requiredRole = 'Mythic team'; // TODO: move to db (has to be in sync with !add-event)
-const logChannel = 'attendance-log';
+const outputChannel = 'attendance-log';
 const statusColorMap = new Map<SignupStatus, number>([['accepted', 0x69e4a6], ['declined', 0xff7285]]);
 
 const memberHasNoStatus = (signups: Signup[], member: GuildMember): boolean => {
@@ -47,9 +47,11 @@ export default createCommand({
         'accepted', // :accepted:
         'declined' // :declined:
     ],
-    onAddReaction: async (message: Message, meta: ReactionMeta, author: GuildMember) => {
-        const { reaction, emojiName } = meta;
+    onAddReaction: async (message: Message, event: ActionEvent, author: GuildMember) => {
+        const { reaction, emojiName } = event;
         const { client, channel, guild } = message;
+
+        if (!emojiName || !reaction) return;
 
         // Remove the reaction of the person who added the reaction
         reaction.remove(author);
@@ -93,7 +95,7 @@ export default createCommand({
         editMessage(reaction.message, updatedEmbed);
 
         const channelsInGuild = client.guilds.find(guild => guild.id === message.guild.id).channels;
-        const outChannelId = channelsInGuild.find(channel => channel.name === logChannel).id;
+        const outChannelId = channelsInGuild.find(channel => channel.name === outputChannel).id;
         const outChannel = <TextChannel>client.channels.get(outChannelId);
 
         if (!outChannel) console.error('Event signup log channel not found'); // TODO inform owner via dm?

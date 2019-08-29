@@ -20,8 +20,14 @@ export type PermissionRoles = {
     whitelisted: string[];
 };
 
+export type ActionEvent = {
+    type: WSEventType;
+    reaction?: MessageReaction;
+    emojiName?: string;
+};
+
 export type Action = {
-    eventType: WSEventType;
+    event: ActionEvent;
     config: CommandConfig;
     author: GuildMember;
     message: Message;
@@ -36,8 +42,8 @@ export type Command = {
     trigger?: RegExp;
     reactions?: string[];
     execute?: (message: Message) => void;
-    onAddReaction?: (message: Message, meta: ReactionMeta, author: GuildMember) => Promise<void> | void;
-    onRemoveReaction?: (message: Message, meta: ReactionMeta, author: GuildMember) => Promise<void> | void;
+    onAddReaction?: (message: Message, event: ActionEvent, author: GuildMember) => Promise<void> | void;
+    onRemoveReaction?: (message: Message, event: ActionEvent, author: GuildMember) => Promise<void> | void;
 };
 
 // TODO: change to generic "event meta" object?
