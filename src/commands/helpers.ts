@@ -70,10 +70,6 @@ export const editMessage = (message: Message, embed: string | RichEmbed) => {
     return message.edit(embed).catch(error => console.error(error));
 };
 
-export const getRolesOfGuildMember = (member: GuildMember): string[] => {
-    return Array.from(member.roles.keys());
-};
-
 export const getMembersWithRole = (members: GuildMember[], requiredRole: string): GuildMember[] => {
     return members.filter(member => {
         const isNotBot = !member.user.bot;

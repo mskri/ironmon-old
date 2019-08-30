@@ -1,8 +1,6 @@
 import { DMChannel, GroupDMChannel, GuildMember, Message, PermissionString, TextChannel } from 'discord.js';
 import { PermissionChannels, PermissionRoles, CommandConfig, Action, Command, ActionEvent } from '../typings';
 
-const getRolesOfGuildMember = (member: GuildMember): string[] => Array.from(member.roles.keys());
-
 export const hasConfig = (config: CommandConfig | undefined): boolean => {
     return config != null;
 };
@@ -53,7 +51,7 @@ export const authorHasPermissionFlags = (author: GuildMember, permissionFlags: P
 
 export const authorHasRole = (author: GuildMember, roles: PermissionRoles): boolean => {
     const { whitelisted, blacklisted } = roles;
-    const authorRoles = getRolesOfGuildMember(author);
+    const authorRoles = Array.from(author.roles.keys());
 
     // Does author have role which should be denied?
     if (blacklisted.some(role => authorRoles.includes(role))) {
