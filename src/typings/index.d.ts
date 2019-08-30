@@ -28,10 +28,11 @@ export type ActionEvent = {
 
 export type Action = {
     event: ActionEvent;
-    config: CommandConfig;
     author: GuildMember;
     message: Message;
+    command: Command;
     execute: () => void;
+    config?: CommandConfig;
 };
 
 export type ActionType = 'MESSAGE' | 'REACTION';

@@ -1,10 +1,9 @@
 import { Client, Message, MessageReaction, Emoji, TextChannel, Guild, GuildMember } from 'discord.js';
 import { createAction } from './commands/factory';
 import { actionQueue } from './commands/queue';
-import { getMessageTrigger, getReactionListener, getActionConfig } from './commands/helpers';
+import { getMessageTrigger, getReactionListener } from './commands/helpers';
 import actions from './commands/actions';
 import preventDM from './utils/prevent-dm';
-import configs from './configs/trigger-permissions';
 
 // Note: should match MESSAGE_REACTION_ADD or MESSAGE_REACTION_REMOVE from discord.js
 // if discord.js changes that they should be changed to reflect the new ones here too.
@@ -40,16 +39,12 @@ export const onMessage = (client: Client, message: Message) => {
     const messageTrigger = getMessageTrigger(actions, message.content);
     if (!messageTrigger) return;
 
-    const config = getActionConfig(configs, message.guild.id, messageTrigger.name);
-    if (!config) return;
-
     const author: GuildMember = message.member;
     const action = createAction({
         event: { type: 'MESSAGE_CREATE' },
-        config,
         author,
         message,
-        action: messageTrigger
+        command: messageTrigger
     });
 
     actionQueue.next(action);
@@ -86,19 +81,15 @@ export const onRaw = async (client: Client, event: any) => {
     const reactionListener = getReactionListener(actions, reaction.emoji);
     if (!reactionListener) return;
 
-    const config = getActionConfig(configs, guild.id, reactionListener.name);
-    if (!config) return;
-
     const action = createAction({
         event: {
             type: event.t,
             reaction,
             emojiName
         },
-        config,
         author,
         message,
-        action: reactionListener
+        command: reactionListener
     });
 
     actionQueue.next(action);

@@ -3,6 +3,10 @@ import { PermissionChannels, PermissionRoles, CommandConfig, Action, Command, Ac
 
 const getRolesOfGuildMember = (member: GuildMember): string[] => Array.from(member.roles.keys());
 
+export const hasConfig = (config: CommandConfig | undefined): boolean => {
+    return config != null;
+};
+
 export const isInAllowedChannel = (
     channel: TextChannel | DMChannel | GroupDMChannel,
     channels: PermissionChannels
@@ -79,44 +83,43 @@ export const createCommand = (command: Command): Command => command;
 
 export const createAction = (opts: {
     event: ActionEvent;
-    config: CommandConfig;
     author: GuildMember;
     message: Message;
-    action: Command;
+    command: Command;
 }): Action => {
-    const { event, author, message, action } = opts;
+    const { event, author, message, command } = opts;
 
-    const executeOnAddReaction = (action: Command, event?: ActionEvent): void => {
-        if (action.onAddReaction && event) {
+    const executeOnAddReaction = (command: Command, event?: ActionEvent): void => {
+        if (command.onAddReaction && event) {
             console.log('Execute onAddReaction');
-            action.onAddReaction(message, event, author);
+            command.onAddReaction(message, event, author);
         }
     };
 
-    const executeOnRemoveReaction = (action: Command, event?: ActionEvent): void => {
-        if (action.onRemoveReaction && event) {
+    const executeOnRemoveReaction = (command: Command, event?: ActionEvent): void => {
+        if (command.onRemoveReaction && event) {
             console.log('Execute onRemoveReaction');
-            action.onRemoveReaction(message, event, author);
+            command.onRemoveReaction(message, event, author);
         }
     };
 
-    const executeOnMessage = (action: Command, message: Message): void => {
-        if (action.execute && message) {
+    const executeOnMessage = (command: Command, message: Message): void => {
+        if (command.execute && message) {
             console.log('Execute onMessage');
-            action.execute(message);
+            command.execute(message);
         }
     };
 
     const execute = () => {
         switch (event.type) {
             case 'MESSAGE_REACTION_ADD':
-                executeOnAddReaction(action, event);
+                executeOnAddReaction(command, event);
                 break;
             case 'MESSAGE_REACTION_REMOVE':
-                executeOnRemoveReaction(action, event);
+                executeOnRemoveReaction(command, event);
                 break;
             case 'MESSAGE_CREATE':
-                executeOnMessage(action, message);
+                executeOnMessage(command, message);
         }
     };
 

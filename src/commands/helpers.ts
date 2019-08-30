@@ -8,16 +8,22 @@ import {
     ReactionEmoji,
     Emoji
 } from 'discord.js';
-import { Command, CommandConfig } from '../typings';
+import { Action, Command, CommandConfig } from '../typings';
 
 // TODO: make logging better, maybe util function? Now e.g. user's details need to be parsed multiple times
 
-export const getActionConfig = (
+export const addCommandConfigToAction = (configs: { [key: string]: CommandConfig[] }, action: Action): Action => {
+    const { message, command } = action;
+    const config = getCommandConfig(configs, message.guild.id, command.name);
+    return Object.assign(action, { config });
+};
+
+export const getCommandConfig = (
     configs: { [key: string]: CommandConfig[] },
     guildId: string,
     triggerName: string
-): CommandConfig | undefined => {
-    return configs[guildId].find(conf => conf.triggers.includes(triggerName));
+): CommandConfig | null => {
+    return configs[guildId].find(conf => conf.triggers.includes(triggerName)) || null;
 };
 
 export const getMessageTrigger = (actions: Command[], message: string): Command | undefined => {
