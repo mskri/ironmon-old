@@ -36,7 +36,7 @@ export default createCommand({
             const { start, color } = args;
 
             if (missingKeys.length > 0) {
-                throw `Missing following arguments: ${missingKeys.join(', ')}`;
+                throw new Error(`Missing following arguments: ${missingKeys.join(', ')}`);
             }
 
             if (start && !isValid(new Date())) {
@@ -80,7 +80,7 @@ export default createCommand({
             });
         } catch (error) {
             console.error(`addEvent | ${error}`);
-            sendErrorToChannel(message.channel, `Error creating new event: ${error.message}`);
+            sendErrorToChannel(message.channel, error.message);
         }
     }
 });
