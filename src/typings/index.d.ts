@@ -37,9 +37,17 @@ export type Action = {
 
 export type ActionType = 'MESSAGE' | 'REACTION';
 
+export type CommandHelp = {
+    title: string;
+    description: string;
+    command: string;
+    example?: string;
+};
+
 export type Command = {
     type: ActionType;
     name: string;
+    help?: CommandHelp;
     trigger?: RegExp;
     reactions?: string[];
     execute?: (message: Message) => void;

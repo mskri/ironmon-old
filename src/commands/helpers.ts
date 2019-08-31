@@ -12,6 +12,13 @@ import { Action, Command, CommandConfig } from '../typings';
 
 // TODO: make logging better, maybe util function? Now e.g. user's details need to be parsed multiple times
 
+export const getCommandArguments = (message: string): string[] => {
+    return message
+        .replace(/^![a-zA-Z-]+\b/, '')
+        .trim()
+        .split(' ');
+};
+
 export const addCommandConfigToAction = (configs: { [key: string]: CommandConfig[] }, action: Action): Action => {
     const { message, command } = action;
     const config = getCommandConfig(configs, message.guild.id, command.name);
@@ -26,8 +33,8 @@ export const getCommandConfig = (
     return configs[guildId].find(conf => conf.triggers.includes(triggerName)) || null;
 };
 
-export const getMessageTrigger = (actions: Command[], message: string): Command | undefined => {
-    const messageTriggers = actions.filter(action => action.type === 'MESSAGE');
+export const getMessageTrigger = (commands: Command[], message: string): Command | undefined => {
+    const messageTriggers = commands.filter(action => action.type === 'MESSAGE');
 
     if (!messageTriggers) return;
 
@@ -38,8 +45,8 @@ export const getMessageTrigger = (actions: Command[], message: string): Command 
     });
 };
 
-export const getReactionListener = (actions: Command[], emoji: Emoji | ReactionEmoji): Command | undefined => {
-    const reactionListeners = actions.filter(action => action.type === 'REACTION');
+export const getReactionListener = (commands: Command[], emoji: Emoji | ReactionEmoji): Command | undefined => {
+    const reactionListeners = commands.filter(action => action.type === 'REACTION');
 
     if (!reactionListeners) return;
 

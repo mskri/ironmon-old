@@ -2,7 +2,7 @@ import { Client, Message, MessageReaction, Emoji, TextChannel, Guild, GuildMembe
 import { createAction } from './commands/factory';
 import { actionQueue } from './commands/queue';
 import { getMessageTrigger, getReactionListener } from './commands/helpers';
-import actions from './commands/actions';
+import commands from './commands';
 import preventDM from './utils/prevent-dm';
 
 // Note: should match MESSAGE_REACTION_ADD or MESSAGE_REACTION_REMOVE from discord.js
@@ -36,7 +36,7 @@ export const onMessage = (client: Client, message: Message) => {
 
     // Check if the message matches any triggers (commands)
     // Triggers are defined with regex and don't necessarily start with !command
-    const messageTrigger = getMessageTrigger(actions, message.content);
+    const messageTrigger = getMessageTrigger(commands, message.content);
     if (!messageTrigger) return;
 
     const author: GuildMember = message.member;
@@ -78,7 +78,7 @@ export const onRaw = async (client: Client, event: any) => {
         reaction = new MessageReaction(message, emoji, 1, originatingFromMe);
     }
 
-    const reactionListener = getReactionListener(actions, reaction.emoji);
+    const reactionListener = getReactionListener(commands, reaction.emoji);
     if (!reactionListener) return;
 
     const action = createAction({

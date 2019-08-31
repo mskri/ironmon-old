@@ -4,7 +4,13 @@ import { createCommand } from '../factory';
 
 export default createCommand({
     type: 'MESSAGE',
-    name: 'getRoleId',
+    name: 'role-id',
+    help: {
+        title: 'Get role ID',
+        description: 'Returns ID for given role.',
+        command: '!role-id',
+        example: '!role-id <role name>'
+    },
     trigger: /^!role-id/,
     execute: (message: Message) => {
         const roleNameToSearch = message.content.replace(/^![a-zA-Z-]+\b/, '').trim();

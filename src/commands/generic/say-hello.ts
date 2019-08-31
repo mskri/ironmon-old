@@ -4,9 +4,15 @@ import { createCommand } from '../factory';
 
 export default createCommand({
     type: 'MESSAGE',
-    name: 'sayHello',
+    name: 'hello',
+    help: {
+        title: 'Respond to hello',
+        description: 'Replies "hello" to user',
+        command: '"hello"',
+        example: 'hello everyone!'
+    },
     trigger: /hello/,
     execute: (message: Message) => {
-        sendToChannel(message.channel, `Hello ${message.author}`);
+        sendToChannel(message.channel, '👋');
     }
 });

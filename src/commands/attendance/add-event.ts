@@ -23,7 +23,13 @@ const reactionstoAdd = [
 
 export default createCommand({
     type: 'MESSAGE',
-    name: 'addEvent',
+    name: 'add-event',
+    help: {
+        title: 'Add new event',
+        description: 'Adds new event to attendance system.',
+        command: '!add-event',
+        example: '!add-event --title "First event" --start 2019-08-11T22:00+03:00 --duration "1h 20m"'
+    },
     trigger: /^!add-event/,
     execute: async (message: Message) => {
         try {

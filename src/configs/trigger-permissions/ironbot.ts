@@ -2,7 +2,19 @@ import { CommandConfig } from '../../typings';
 
 const triggerPermissions: CommandConfig[] = [
     {
-        triggers: ['sayHello', 'getChannelId', 'getEmojiId', 'getRoleId'],
+        triggers: ['hello', 'channel-id', 'emoji-id', 'role-id'],
+        channels: {
+            blacklisted: [],
+            whitelisted: []
+        },
+        roles: {
+            blacklisted: [],
+            whitelisted: []
+        },
+        permissionFlags: []
+    },
+    {
+        triggers: ['help'],
         channels: {
             blacklisted: [],
             whitelisted: []
@@ -26,7 +38,7 @@ const triggerPermissions: CommandConfig[] = [
         permissionFlags: []
     },
     {
-        triggers: ['addEvent', 'eventSignupReaction'],
+        triggers: ['add-event', 'eventSignupReaction'],
         channels: {
             blacklisted: [],
             whitelisted: [

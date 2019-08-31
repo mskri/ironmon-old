@@ -4,7 +4,13 @@ import { createCommand } from '../factory';
 
 export default createCommand({
     type: 'MESSAGE',
-    name: 'getEmojiId',
+    name: 'emoji-id',
+    help: {
+        title: 'Get emoji ID',
+        description: 'Returns ID for given emoji.',
+        command: '!emoji-id',
+        example: '!emoji-id <emoji name>'
+    },
     trigger: /^!emoji-id/,
     execute: (message: Message) => {
         const emojiNameToSearch: string = message.content.replace(/^![a-zA-Z-]+\b/, '').trim();
