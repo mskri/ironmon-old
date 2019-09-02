@@ -57,6 +57,7 @@ export const onRaw = async (client: Client, event: any) => {
     const user = client.users.get(data.user_id);
     const channel = client.channels.get(data.channel_id);
 
+    // If required data not found do nothing
     if (!user || !channel) return;
 
     // Ignore bots reactions and reactions on other channels than text

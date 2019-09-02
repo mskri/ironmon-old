@@ -9,9 +9,9 @@ export const actionQueue = new RxQueue<Action>();
 actionQueue
     .pipe(
         map(action => addCommandConfigToAction(configs, action)),
-        filter(action => hasConfig(action.config)),
-        filter(action => authorHasPermissionFlags(action.author, action.config!.permissionFlags)),
-        filter(action => isInAllowedChannel(action.message.channel, action.config!.channels)),
-        filter(action => authorHasRole(action.author, action.config!.roles))
+        filter(action => hasConfig(action.config)), // Ensure we have config available for the command
+        filter(action => authorHasPermissionFlags(action.config!.permissionFlags, action.author)),
+        filter(action => isInAllowedChannel(action.config!.channels, action.message.channel)),
+        filter(action => authorHasRole(action.config!.roles, action.author))
     )
     .subscribe(action => action.execute());

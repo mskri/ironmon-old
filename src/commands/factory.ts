@@ -1,13 +1,13 @@
 import { DMChannel, GroupDMChannel, GuildMember, Message, PermissionString, TextChannel } from 'discord.js';
 import { PermissionChannels, PermissionRoles, CommandConfig, Action, Command, ActionEvent } from '../typings';
 
-export const hasConfig = (config: CommandConfig | undefined): boolean => {
+export const hasConfig = (config: CommandConfig | null): boolean => {
     return config != null;
 };
 
 export const isInAllowedChannel = (
-    channel: TextChannel | DMChannel | GroupDMChannel,
-    channels: PermissionChannels
+    channels: PermissionChannels,
+    channel: TextChannel | DMChannel | GroupDMChannel
 ): boolean => {
     const { whitelisted, blacklisted } = channels;
 
@@ -33,7 +33,7 @@ export const isInAllowedChannel = (
     return false;
 };
 
-export const authorHasPermissionFlags = (author: GuildMember, permissionFlags: PermissionString[]): boolean => {
+export const authorHasPermissionFlags = (permissionFlags: PermissionString[], author: GuildMember): boolean => {
     // TODO: will crash app, should not!
     if (!permissionFlags) throw new Error('No required permissionsFlags defined');
     if (permissionFlags.length === 0) return true;
@@ -49,7 +49,7 @@ export const authorHasPermissionFlags = (author: GuildMember, permissionFlags: P
     return true;
 };
 
-export const authorHasRole = (author: GuildMember, roles: PermissionRoles): boolean => {
+export const authorHasRole = (roles: PermissionRoles, author: GuildMember): boolean => {
     const { whitelisted, blacklisted } = roles;
     const authorRoles = Array.from(author.roles.keys());
 
@@ -121,5 +121,5 @@ export const createAction = (opts: {
         }
     };
 
-    return Object.assign({}, opts, { execute });
+    return Object.assign({}, opts, { execute, config: null });
 };

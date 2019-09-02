@@ -21,11 +21,11 @@ export const getCommandArguments = (message: string): string[] => {
 
 export const addCommandConfigToAction = (configs: { [key: string]: CommandConfig[] }, action: Action): Action => {
     const { message, command } = action;
-    const config = getCommandConfig(configs, message.guild.id, command.name);
+    const config = getCommandConfigForGuild(configs, message.guild.id, command.name);
     return Object.assign(action, { config });
 };
 
-export const getCommandConfig = (
+export const getCommandConfigForGuild = (
     configs: { [key: string]: CommandConfig[] },
     guildId: string,
     triggerName: string

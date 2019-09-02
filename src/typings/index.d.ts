@@ -32,7 +32,7 @@ export type Action = {
     message: Message;
     command: Command;
     execute: () => void;
-    config?: CommandConfig;
+    config: CommandConfig | null;
 };
 
 export type ActionType = 'MESSAGE' | 'REACTION';
