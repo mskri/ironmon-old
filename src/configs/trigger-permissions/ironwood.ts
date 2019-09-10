@@ -55,7 +55,7 @@ const triggerPermissions: CommandConfig[] = [
         permissionFlags: []
     },
     {
-        triggers: ['add-event', 'eventSignupReaction'],
+        triggers: ['add-event'],
         channels: {
             blacklisted: [],
             whitelisted: [
@@ -65,7 +65,28 @@ const triggerPermissions: CommandConfig[] = [
         roles: {
             blacklisted: [],
             whitelisted: [
-                '362570857370877953' // officers
+                '362570857370877953', // officers
+                '519412435883524096' // botmanager
+            ]
+        },
+        permissionFlags: [],
+        options: {
+            requiredRoleName: 'Mythic team',
+            outputChannel: 'attendance-log'
+        }
+    },
+    {
+        triggers: ['eventSignupReaction'],
+        channels: {
+            blacklisted: [],
+            whitelisted: [
+                '422779613073244160' // #attendance
+            ]
+        },
+        roles: {
+            blacklisted: [],
+            whitelisted: [
+                '362559147184488449' // mythic team
             ]
         },
         permissionFlags: [],
