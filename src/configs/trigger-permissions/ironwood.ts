@@ -4,10 +4,10 @@ const triggerPermissions: CommandConfig[] = [
     {
         triggers: ['hello'],
         channels: {
-            blacklisted: [
+            blacklisted: [],
+            whitelisted: [
                 '352889929212100619' // #general
-            ],
-            whitelisted: []
+            ]
         },
         roles: {
             blacklisted: [],
@@ -18,10 +18,10 @@ const triggerPermissions: CommandConfig[] = [
     {
         triggers: ['channel-id', 'emoji-id', 'role-id'],
         channels: {
-            blacklisted: [
+            blacklisted: [],
+            whitelisted: [
                 '422779613073244160' // #attendance
-            ],
-            whitelisted: []
+            ]
         },
         roles: {
             blacklisted: [],
