@@ -65,7 +65,7 @@ const triggerPermissions: CommandConfig[] = [
         roles: {
             blacklisted: [],
             whitelisted: [
-                // officers
+                '362570857370877953' // officers
             ]
         },
         permissionFlags: [],
