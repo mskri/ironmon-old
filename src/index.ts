@@ -1,8 +1,8 @@
 import 'source-map-support/register';
-
 import { Client, Message, Guild } from 'discord.js';
-import { AUTH_TOKEN } from './configs/env';
 import * as bot from './bot';
+
+const { AUTH_TOKEN } = process.env;
 
 const client = new Client({
     disabledEvents: [
