@@ -1,17 +1,9 @@
-import * as dotenv from 'dotenv-safe';
-import * as path from 'path';
 import { Client, Message, MessageReaction, Emoji, TextChannel, Guild, GuildMember } from 'discord.js';
 import { createAction } from './commands/factory';
 import { actionQueue } from './commands/queue';
 import { getMessageTrigger, getReactionListener } from './commands/helpers';
 import commands from './commands';
 import preventDM from './utils/prevent-dm';
-
-dotenv.config({
-    path: path.join(__dirname, '../.env'),
-    sample: path.join(__dirname, '../.env.example'),
-    allowEmptyValues: true
-});
 
 // Note: should match MESSAGE_REACTION_ADD or MESSAGE_REACTION_REMOVE from discord.js
 // if discord.js changes that they should be changed to reflect the new ones here too.

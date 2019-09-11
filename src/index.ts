@@ -2,7 +2,7 @@ import 'source-map-support/register';
 import { Client, Message, Guild } from 'discord.js';
 import * as bot from './bot';
 
-const { AUTH_TOKEN } = process.env;
+const { BOT_AUTH_TOKEN } = process.env;
 
 const client = new Client({
     disabledEvents: [
@@ -22,4 +22,4 @@ client.on('ready', () => bot.onReady(client));
 client.on('message', (message: Message) => bot.onMessage(client, message));
 client.on('raw', async (event: any) => bot.onRaw(client, event));
 
-client.login(AUTH_TOKEN);
+client.login(BOT_AUTH_TOKEN);

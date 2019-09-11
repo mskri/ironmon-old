@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  postgraphile-dev:
+    image: graphile/postgraphile:4
+    container_name: postgraphile-dev
+    restart: unless-stopped
+    expose:
+      - 5000
+    ports:
+      - 5000:5000
+    command: [
+      "postgraphile",
+      "--connection", "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}",
+      "--port", "5000",
+      "-j",
+      "-a"
+    ]
+
+  ironmon-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.development
+    image: ironmon-dev
+    container_name: ironmon-dev
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - BOT_AUTH_TOKEN=${BOT_AUTH_TOKEN}
+      - OWNER_DISCORD_ID=${OWNER_DISCORD_ID}
+      - GRAPHQL_ENDPOINT_HOST=${GRAPHQL_ENDPOINT_HOST}
+    depends_on:
+      - postgraphile-dev
+    working_dir: /home/node/app
+    volumes:
+      - ./:/home/node/app
+    command: ["./wait-for", "postgraphile-dev:5000", "--", "npm", "run", "dev"]

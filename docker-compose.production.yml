@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  postgraphile:
+    image: graphile/postgraphile:4
+    container_name: postgraphile
+    restart: unless-stopped
+    expose:
+      - 5000
+    ports:
+      - 5000:5000
+    command: [
+      "postgraphile",
+      "--connection", "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}?ssl=1",
+      "--port", "5000",
+      "-j",
+      "-a"
+    ]
+
+  ironmon:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    image: ironmon
+    container_name: ironmon
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - BOT_AUTH_TOKEN=${BOT_AUTH_TOKEN}
+      - OWNER_DISCORD_ID=${OWNER_DISCORD_ID}
+      - GRAPHQL_ENDPOINT_HOST=${GRAPHQL_ENDPOINT_HOST}
+    depends_on:
+      - postgraphile
+    command: ["./wait-for", "postgraphile:5000", "--", "npm", "run", "production"]
