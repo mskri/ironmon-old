@@ -1,5 +1,5 @@
 import { Message, TextChannel, Guild, GuildMember, RichEmbed } from 'discord.js';
-import { ActionEvent, Signup, SignupStatus } from '../../typings';
+import { ActionEvent, Signup, SignupStatus } from '../../types';
 import { createCommand } from '../factory';
 import { getMembersWithRoleSorted, sendToChannel, editMessage } from '../helpers';
 import { saveSingup, updateSignupStatus, getSignupsForEventByEventId } from '../../database/signups';

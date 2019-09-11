@@ -1,5 +1,5 @@
 import { TextChannel, DMChannel, GroupDMChannel, Message, RichEmbed } from 'discord.js';
-import { Command } from '../../typings';
+import { Command } from '../../types';
 import { createCommand } from '../factory';
 import { getCommandArguments, sendToChannel } from '../helpers';
 import { getCommandsWithHelp, getCommandByName } from '../index';

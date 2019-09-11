@@ -1,6 +1,6 @@
 import ironbot from './ironbot';
 import ironwood from './ironwood';
-import { CommandConfig } from '../../typings';
+import { CommandConfig } from '../../types';
 
 // TODO: Ideally these settings would be received from db and not from hardcoded json
 const configs: { [key: string]: CommandConfig[] } = {

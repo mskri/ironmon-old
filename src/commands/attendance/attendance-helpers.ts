@@ -1,5 +1,5 @@
 import { RichEmbed, Message, GuildMember } from 'discord.js';
-import { AttendanceEvent, InputArgs, SignupStatus } from '../../typings';
+import { AttendanceEvent, InputArgs, SignupStatus } from '../../types';
 import { fetchLastEventId } from '../../database/events';
 import { addHours, addMinutes, differenceInHours, differenceInMinutes, subHours } from 'date-fns';
 import { formatToTimeZone } from 'date-fns-timezone';

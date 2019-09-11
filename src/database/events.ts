@@ -1,4 +1,4 @@
-import { AttendanceEvent } from '../typings';
+import { AttendanceEvent } from '../types';
 import apolloClient from '../apollo';
 import gql from 'graphql-tag';
 

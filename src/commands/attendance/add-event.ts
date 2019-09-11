@@ -1,4 +1,4 @@
-import { AttendanceEvent, InputArgs } from '../../typings';
+import { AttendanceEvent, InputArgs } from '../../types';
 import { Message, TextChannel, RichEmbed, GuildMember } from 'discord.js';
 import { createCommand } from '../factory';
 import { sendToChannel, editMessage } from '../helpers';

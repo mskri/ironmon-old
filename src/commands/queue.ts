@@ -1,6 +1,6 @@
 import { RxQueue } from 'rx-queue';
 import { map, filter } from 'rxjs/operators';
-import { Action } from '../typings';
+import { Action } from '../types';
 import { isInAllowedChannel, authorHasPermissionFlags, authorHasRole, hasConfig } from './factory';
 import { addCommandConfigToAction } from './helpers';
 import configs from '../configs/trigger-permissions';

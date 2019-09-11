@@ -1,4 +1,4 @@
-import { Command } from '../typings';
+import { Command } from '../types';
 
 // Reaction listeners
 import eventSignup from './attendance/event-signup';

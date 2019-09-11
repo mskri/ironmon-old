@@ -1,4 +1,4 @@
-import { CommandConfig } from '../../typings';
+import { CommandConfig } from '../../types';
 
 const triggerPermissions: CommandConfig[] = [
     {

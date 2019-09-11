@@ -8,7 +8,7 @@ import {
     ReactionEmoji,
     Emoji
 } from 'discord.js';
-import { Action, Command, CommandConfig } from '../typings';
+import { Action, Command, CommandConfig } from '../types';
 
 // TODO: make logging better, maybe util function? Now e.g. user's details need to be parsed multiple times
 

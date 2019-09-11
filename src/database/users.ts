@@ -1,5 +1,5 @@
 import { GuildMember } from 'discord.js';
-import { DiscordUser } from '../typings';
+import { DiscordUser } from '../types';
 import apolloClient from '../apollo';
 import gql from 'graphql-tag';
 

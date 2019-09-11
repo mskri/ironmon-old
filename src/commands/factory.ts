@@ -1,5 +1,5 @@
 import { DMChannel, GroupDMChannel, GuildMember, Message, PermissionString, TextChannel } from 'discord.js';
-import { PermissionChannels, PermissionRoles, CommandConfig, Action, Command, ActionEvent } from '../typings';
+import { PermissionChannels, PermissionRoles, CommandConfig, Action, Command, ActionEvent } from '../types';
 
 export const hasConfig = (config: CommandConfig | null): boolean => {
     return config != null;

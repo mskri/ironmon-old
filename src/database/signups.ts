@@ -1,4 +1,4 @@
-import { Signup, SignupStatus } from '../typings';
+import { Signup, SignupStatus } from '../types';
 import apolloClient from '../apollo';
 import gql from 'graphql-tag';
 
