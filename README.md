@@ -67,13 +67,13 @@ docker-compose -f docker-compose.development.yml stop
 Start services in production mode
 
 ```bash
-docker-compose -f -d docker-compose.production.yml up
+docker-compose -f docker-compose.production.yml up -d
 ```
 
 Stop production services
 
 ```bash
-docker-compose -f -d docker-compose.production.yml stop
+docker-compose -f docker-compose.production.yml stop
 ```
 
 ## TODO backlog
