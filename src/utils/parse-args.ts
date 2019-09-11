@@ -55,7 +55,10 @@ const processargvify = (input: string): string[] => {
         .filter(o => o.trim().length > 0); // Filter out blanks and spaces
 };
 
-export const parseArgs = (input: string, defaults: object): { [key: string]: string | boolean | number | Date } => {
+export const parseArgs = (
+    input: string,
+    defaults: object
+): { [key: string]: string | boolean | number | Date } => {
     const argKeyRegExp = /^--\w+/;
     let args = processargvify(input.trim());
     let props: { [key: string]: string | boolean | number | Date } = {};

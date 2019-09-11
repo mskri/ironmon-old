@@ -1,5 +1,19 @@
-import { DMChannel, GroupDMChannel, GuildMember, Message, PermissionString, TextChannel } from 'discord.js';
-import { PermissionChannels, PermissionRoles, CommandConfig, Action, Command, ActionEvent } from '../types';
+import {
+    DMChannel,
+    GroupDMChannel,
+    GuildMember,
+    Message,
+    PermissionString,
+    TextChannel
+} from 'discord.js';
+import {
+    PermissionChannels,
+    PermissionRoles,
+    CommandConfig,
+    Action,
+    Command,
+    ActionEvent
+} from '../types';
 
 export const hasConfig = (config: CommandConfig | null): boolean => {
     return config != null;
@@ -33,7 +47,10 @@ export const isInAllowedChannel = (
     return false;
 };
 
-export const authorHasPermissionFlags = (permissionFlags: PermissionString[], author: GuildMember): boolean => {
+export const authorHasPermissionFlags = (
+    permissionFlags: PermissionString[],
+    author: GuildMember
+): boolean => {
     // TODO: will crash app, should not!
     if (!permissionFlags) throw new Error('No required permissionsFlags defined');
     if (permissionFlags.length === 0) return true;
@@ -41,7 +58,9 @@ export const authorHasPermissionFlags = (permissionFlags: PermissionString[], au
     const hasAllRequiredPermissions = permissionFlags.every(flag => author.hasPermission(flag));
 
     if (!hasAllRequiredPermissions) {
-        console.error(`User does not have required permission flags: (${permissionFlags.join(', ')}`);
+        console.error(
+            `User does not have required permission flags: (${permissionFlags.join(', ')}`
+        );
         return false;
     }
 

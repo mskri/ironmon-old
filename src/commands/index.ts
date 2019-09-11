@@ -24,7 +24,10 @@ export default allCommands;
 
 export const getCommandsWithHelp = (): Command[] => allCommands.filter(command => command.help);
 
-export const getCommandByName = (commandName: string, helpRequired: boolean = false): Command | undefined => {
+export const getCommandByName = (
+    commandName: string,
+    helpRequired: boolean = false
+): Command | undefined => {
     if (helpRequired) {
         return getCommandsWithHelp().find(command => command.name === commandName);
     }

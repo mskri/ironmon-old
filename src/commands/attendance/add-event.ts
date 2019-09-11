@@ -28,7 +28,8 @@ export default createCommand({
         title: 'Add new event',
         description: 'Adds new event to attendance system.',
         command: '!add-event',
-        example: '!add-event --title "First event" --start 2019-08-11T22:00+03:00 --duration "1h 20m"'
+        example:
+            '!add-event --title "First event" --start 2019-08-11T22:00+03:00 --duration "1h 20m"'
     },
     trigger: /^!add-event/,
     execute: async (message: Message) => {
@@ -50,11 +51,16 @@ export default createCommand({
             }
 
             if (color && !isHexColorFormat(color)) {
-                throw new Error('Invalid color format, should be hex value with 6 digits. E.g. #ff000.');
+                throw new Error(
+                    'Invalid color format, should be hex value with 6 digits. E.g. #ff000.'
+                );
             }
 
             const event: AttendanceEvent = await createEvent(args, message);
-            const noStatusUsers: GuildMember[] = getMembersWithRoleSorted(<TextChannel>channel, requiredRole);
+            const noStatusUsers: GuildMember[] = getMembersWithRoleSorted(
+                <TextChannel>channel,
+                requiredRole
+            );
             const userExists: boolean = await checkIfUserExists(member.id);
 
             if (!userExists) {

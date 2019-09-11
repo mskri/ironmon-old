@@ -4,7 +4,10 @@ import gql from 'graphql-tag';
 
 const TAG = 'database/events';
 
-export const saveEvent = async (event: AttendanceEvent, messageId: string): Promise<number | null> => {
+export const saveEvent = async (
+    event: AttendanceEvent,
+    messageId: string
+): Promise<number | null> => {
     const variables = Object.assign(event, { messageId });
 
     try {
@@ -80,7 +83,18 @@ export const fetchEventByMessageId = async (messageId: string): Promise<Attendan
         const data = result.data.eventByMessageId;
         if (data == null) throw new Error(`Event with messageId ${messageId} not found`);
 
-        const { rowId, title, description, startTime, endTime, userId, guildId, channelId, color, url } = data;
+        const {
+            rowId,
+            title,
+            description,
+            startTime,
+            endTime,
+            userId,
+            guildId,
+            channelId,
+            color,
+            url
+        } = data;
 
         return <AttendanceEvent>{
             rowId,

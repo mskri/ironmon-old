@@ -68,7 +68,11 @@ export const createEvent = async (args: InputArgs, message: Message): Promise<At
     };
 };
 
-export const createDescriptionText = (startTime: Date, endTime: Date, description: string): string => {
+export const createDescriptionText = (
+    startTime: Date,
+    endTime: Date,
+    description: string
+): string => {
     const date: string = formatToTimeZone(startTime, 'dddd DD/MM', { timeZone });
     const startHours: string = formatToTimeZone(startTime, 'HH:mm', { timeZone });
     const endHours: string = formatToTimeZone(endTime, 'HH:mm', { timeZone });

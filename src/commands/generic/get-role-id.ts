@@ -15,7 +15,9 @@ export default createCommand({
     execute: (message: Message) => {
         const roleNameToSearch = message.content.replace(/^![a-zA-Z-]+\b/, '').trim();
         const channel = <TextChannel>message.channel;
-        const role = channel.guild.roles.find(role => role.name.toLowerCase() === roleNameToSearch.toLowerCase());
+        const role = channel.guild.roles.find(
+            role => role.name.toLowerCase() === roleNameToSearch.toLowerCase()
+        );
 
         let result = 'No such role found';
 

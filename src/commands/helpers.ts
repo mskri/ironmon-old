@@ -19,7 +19,10 @@ export const getCommandArguments = (message: string): string[] => {
         .split(' ');
 };
 
-export const addCommandConfigToAction = (configs: { [key: string]: CommandConfig[] }, action: Action): Action => {
+export const addCommandConfigToAction = (
+    configs: { [key: string]: CommandConfig[] },
+    action: Action
+): Action => {
     const { message, command } = action;
     const config = getCommandConfigForGuild(configs, message.guild.id, command.name);
     return Object.assign(action, { config });
@@ -45,7 +48,10 @@ export const getMessageTrigger = (commands: Command[], message: string): Command
     });
 };
 
-export const getReactionListener = (commands: Command[], emoji: Emoji | ReactionEmoji): Command | undefined => {
+export const getReactionListener = (
+    commands: Command[],
+    emoji: Emoji | ReactionEmoji
+): Command | undefined => {
     const reactionListeners = commands.filter(action => action.type === 'REACTION');
 
     if (!reactionListeners) return;
@@ -66,7 +72,10 @@ export const sendToChannel = (
     return channel.send(message).then(message => <Message>message);
 };
 
-export const sendErrorToChannel = (channel: TextChannel | DMChannel | GroupDMChannel, error: string): void => {
+export const sendErrorToChannel = (
+    channel: TextChannel | DMChannel | GroupDMChannel,
+    error: string
+): void => {
     channel
         .send(error)
         .then(message => (message as Message).react('❌'))
@@ -85,7 +94,10 @@ export const getMembersWithRole = (members: GuildMember[], requiredRole: string)
     });
 };
 
-export const getMembersWithRoleSorted = (channel: TextChannel, requiredRole: string): GuildMember[] => {
+export const getMembersWithRoleSorted = (
+    channel: TextChannel,
+    requiredRole: string
+): GuildMember[] => {
     const membersWithRole = getMembersWithRole(channel.members.array(), requiredRole);
     return membersWithRole.sort((a: any, b: any) => a.username - b.username);
 };

@@ -37,7 +37,10 @@ export default createCommand({
 
 const wrapInCodeBlock = (code: string): string => '```\n' + code + '\n```';
 
-const replyHelpForSpecifiedCommand = (channel: TextChannel | DMChannel | GroupDMChannel, command: Command): void => {
+const replyHelpForSpecifiedCommand = (
+    channel: TextChannel | DMChannel | GroupDMChannel,
+    command: Command
+): void => {
     // If the command doesn't have help data there's nothing to show
     if (!command || !command.help) {
         sendToChannel(channel, 'No matching command not found. Try `!help`?');

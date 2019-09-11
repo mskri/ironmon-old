@@ -75,7 +75,12 @@ export const saveUser = async (member: GuildMember): Promise<number> => {
         const result = await apolloClient.mutate({
             variables,
             mutation: gql`
-                mutation($rowId: String!, $username: String, $discriminator: String, $displayName: String) {
+                mutation(
+                    $rowId: String!
+                    $username: String
+                    $discriminator: String
+                    $displayName: String
+                ) {
                     createUser(
                         input: {
                             user: {

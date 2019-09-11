@@ -1,4 +1,12 @@
-import { Client, Message, MessageReaction, Emoji, TextChannel, Guild, GuildMember } from 'discord.js';
+import {
+    Client,
+    Message,
+    MessageReaction,
+    Emoji,
+    TextChannel,
+    Guild,
+    GuildMember
+} from 'discord.js';
 import { createAction } from './commands/factory';
 import { actionQueue } from './commands/queue';
 import { getMessageTrigger, getReactionListener } from './commands/helpers';
@@ -10,7 +18,9 @@ import preventDM from './utils/prevent-dm';
 const RAW_EVENTS_TO_LISTEN = ['MESSAGE_REACTION_ADD', 'MESSAGE_REACTION_REMOVE'];
 
 export const onGuildCreate = (guild: Guild) => {
-    console.log(`Joined a new guild ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
+    console.log(
+        `Joined a new guild ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`
+    );
 };
 
 export const onGuildDelete = (guild: Guild) => {
@@ -68,7 +78,9 @@ export const onRaw = async (client: Client, event: any) => {
     const message: Message = await (<TextChannel>channel).fetchMessage(data.message_id);
     const guild: Guild = client.guilds.get(data.guild_id)!;
     const author: GuildMember = guild.members.find(member => member.id === user.id);
-    const emojiKey: string = data.emoji.id ? `${data.emoji.name}:${data.emoji.id}` : data.emoji.name;
+    const emojiKey: string = data.emoji.id
+        ? `${data.emoji.name}:${data.emoji.id}`
+        : data.emoji.name;
     const emojiName: string = data.emoji.name;
 
     let reaction = message.reactions.get(emojiKey);

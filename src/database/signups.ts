@@ -4,7 +4,11 @@ import gql from 'graphql-tag';
 
 const TAG = 'database/signups';
 
-export const saveSingup = async (status: SignupStatus, eventId: string, userId: string): Promise<Signup | null> => {
+export const saveSingup = async (
+    status: SignupStatus,
+    eventId: string,
+    userId: string
+): Promise<Signup | null> => {
     const variables = {
         status,
         eventId,
@@ -16,7 +20,11 @@ export const saveSingup = async (status: SignupStatus, eventId: string, userId: 
             variables,
             mutation: gql`
                 mutation($status: String!, $eventId: String!, $userId: String!) {
-                    createEventSignup(input: { eventSignup: { status: $status, eventId: $eventId, userId: $userId } }) {
+                    createEventSignup(
+                        input: {
+                            eventSignup: { status: $status, eventId: $eventId, userId: $userId }
+                        }
+                    ) {
                         eventSignup {
                             rowId
                             status
@@ -32,7 +40,13 @@ export const saveSingup = async (status: SignupStatus, eventId: string, userId: 
         });
 
         // TODO: check result
-        const { rowId, status, eventId, userId, eventByEventId } = result.data.createEventSignup.eventSignup;
+        const {
+            rowId,
+            status,
+            eventId,
+            userId,
+            eventByEventId
+        } = result.data.createEventSignup.eventSignup;
         const eventRowId = eventByEventId.rowId;
 
         return {
@@ -59,7 +73,11 @@ export const updateSignupStatus = (signup: Signup, newStatus: SignupStatus): voi
                     updateEventSignupByRowId(
                         input: {
                             rowId: $rowId
-                            eventSignupPatch: { status: $status, eventId: $eventId, userId: $userId }
+                            eventSignupPatch: {
+                                status: $status
+                                eventId: $eventId
+                                userId: $userId
+                            }
                         }
                     ) {
                         eventSignup {
