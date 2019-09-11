@@ -4,6 +4,7 @@
     "description": "Ironmon, a discord bot written with TypeScript.",
     "main": "index.ts",
     "author": "Sakari Mursu <sakari@mursu.dev>",
+    "license": "MIT",
     "scripts": {
         "start": "npm run dev",
         "test": "echo \"Error: no test specified\" && exit 1",
@@ -42,6 +43,13 @@
         "pretty-quick": "^1.11.1",
         "source-map-support": "^0.5.13",
         "ts-node-dev": "^1.0.0-pre.42"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mskri/ironmon"
+    },
+    "bugs": {
+        "url": "https://github.com/mskri/ironmon/issues"
     },
     "husky": {
         "hooks": {
