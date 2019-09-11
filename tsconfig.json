@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "es5",
+        "target": "es6",
         "module": "commonjs",
         "outDir": "./dist",
         "baseUrl": "./src",
@@ -16,5 +16,4 @@
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules", "**/*.test.ts"]
-    // "files": ["./src/typings/index.d.ts"],
 }
