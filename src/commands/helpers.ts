@@ -69,7 +69,7 @@ export const sendToChannel = (
     channel: TextChannel | DMChannel | GroupDMChannel,
     message: string | RichEmbed
 ): Promise<Message> => {
-    return channel.send(message).then(message => <Message>message);
+    return channel.send(message).then(message => message as Message);
 };
 
 export const sendErrorToChannel = (

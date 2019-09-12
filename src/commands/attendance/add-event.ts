@@ -38,7 +38,7 @@ export default createCommand({
 
             // Remove the command part, .e.g '!add', from beginning of the message
             const input: string = content.replace(/^!\w+\s/, '').trim();
-            const args: InputArgs = <InputArgs>parseArgs(input, defaultArgs); // TODO: refactoring required
+            const args: InputArgs = parseArgs(input, defaultArgs) as InputArgs; // TODO: refactoring required
             const missingKeys: string[] = findMissingKeys(requiredArgs, args);
             const { start, color } = args;
 
@@ -58,7 +58,7 @@ export default createCommand({
 
             const event: AttendanceEvent = await createEvent(args, message);
             const noStatusUsers: GuildMember[] = getMembersWithRoleSorted(
-                <TextChannel>channel,
+                channel as TextChannel,
                 requiredRole
             );
             const userExists: boolean = await checkIfUserExists(member.id);

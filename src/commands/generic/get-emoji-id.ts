@@ -14,7 +14,7 @@ export default createCommand({
     trigger: /^!emoji-id/,
     execute: (message: Message) => {
         const emojiNameToSearch: string = message.content.replace(/^![a-zA-Z-]+\b/, '').trim();
-        const channel = <TextChannel>message.channel;
+        const channel = message.channel as TextChannel;
         const emoji = channel.guild.emojis.find(emoji => emoji.name === emojiNameToSearch);
 
         let result = 'No such emoji found';

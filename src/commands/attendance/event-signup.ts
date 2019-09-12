@@ -97,7 +97,7 @@ export default createCommand({
         }
 
         const membersInChannel: GuildMember[] = getMembersWithRoleSorted(
-            <TextChannel>channel,
+            channel as TextChannel,
             requiredRole
         );
         const noStatusUsers: GuildMember[] = getNoStatusSignups(
@@ -117,7 +117,7 @@ export default createCommand({
 
         const channelsInGuild = client.guilds.find(guild => guild.id === message.guild.id).channels;
         const outChannelId = channelsInGuild.find(channel => channel.name === outputChannel).id;
-        const outChannel = <TextChannel>client.channels.get(outChannelId);
+        const outChannel = client.channels.get(outChannelId) as TextChannel;
 
         if (!outChannel) console.error('Event signup log channel not found'); // TODO inform owner via dm?
 
