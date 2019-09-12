@@ -1,4 +1,5 @@
 CREATE LANGUAGE plpgsql;
+CREATE EXTENSION hstore;
 
 CREATE FUNCTION public.trigger_set_timestamp() RETURNS trigger
     LANGUAGE plpgsql
@@ -104,3 +105,16 @@ ALTER TABLE ONLY public.event_signups
 ALTER TABLE ONLY public.events
     ADD CONSTRAINT events_author_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE SET NULL;
 
+CREATE TABLE trigger_config_groups (
+    id integer DEFAULT nextval('trigger_configurations_id_seq'::regclass) PRIMARY KEY,
+    triggers text[] NOT NULL DEFAULT '{}'::text[],
+    channels_whitelisted text[] NOT NULL DEFAULT '{}'::text[],
+    channels_blacklisted text[] NOT NULL DEFAULT '{}'::text[],
+    roles_whitelisted text[] NOT NULL DEFAULT '{}'::text[],
+    roles_blacklisted text[] NOT NULL DEFAULT '{}'::text[],
+    permission_flags text[] NOT NULL DEFAULT '{}'::text[],
+    options hstore,
+    guild_id text NOT NULL
+);
+
+CREATE UNIQUE INDEX trigger_configurations_pkey ON trigger_config_groups(id int4_ops);

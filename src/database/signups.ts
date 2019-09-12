@@ -26,35 +26,23 @@ export const saveSingup = async (
                         }
                     ) {
                         eventSignup {
-                            rowId
+                            id
                             status
                             eventId
                             userId
-                            eventByEventId {
-                                rowId
-                            }
                         }
                     }
                 }
             `
         });
 
-        // TODO: check result
-        const {
-            rowId,
-            status,
-            eventId,
-            userId,
-            eventByEventId
-        } = result.data.createEventSignup.eventSignup;
-        const eventRowId = eventByEventId.rowId;
+        const { id, status, eventId, userId } = result.data.createEventSignup.eventSignup;
 
         return {
-            rowId,
+            id,
             status,
             eventId,
-            userId,
-            eventRowId
+            userId
         };
     } catch (error) {
         console.error(`${TAG}/saveSingup | ${error.message}`);
@@ -64,15 +52,15 @@ export const saveSingup = async (
 
 export const updateSignupStatus = (signup: Signup, newStatus: SignupStatus): void => {
     const variables = Object.assign(signup, { status: newStatus });
-
+    console.log(12, variables);
     try {
         apolloClient.mutate({
             variables,
             mutation: gql`
-                mutation($rowId: Int!, $status: String!, $eventId: String!, $userId: String!) {
-                    updateEventSignupByRowId(
+                mutation($id: Int!, $status: String!, $eventId: String!, $userId: String!) {
+                    updateEventSignupById(
                         input: {
-                            rowId: $rowId
+                            id: $id
                             eventSignupPatch: {
                                 status: $status
                                 eventId: $eventId
@@ -81,7 +69,7 @@ export const updateSignupStatus = (signup: Signup, newStatus: SignupStatus): voi
                         }
                     ) {
                         eventSignup {
-                            rowId
+                            id
                         }
                     }
                 }
@@ -103,7 +91,7 @@ export const getSignupForUser = async (userId: string, eventId: string): Promise
                 query($userId: String, $eventId: String) {
                     allEventSignups(condition: { userId: $userId, eventId: $eventId }, first: 1) {
                         nodes {
-                            rowId
+                            id
                             status
                         }
                     }
@@ -114,13 +102,14 @@ export const getSignupForUser = async (userId: string, eventId: string): Promise
         const data = result.data.allEventSignups.nodes[0] || null;
         if (!data) throw new Error(`Signup for ${userId} on event ${eventId} not found`);
 
-        const { rowId, status } = data;
-        return <Signup>{
-            rowId,
+        const { id, status } = data;
+
+        return {
+            id,
             status,
             eventId,
             userId
-        };
+        } as Signup;
     } catch (error) {
         console.error(`${TAG}/getSignupForUser | ${error.message}`);
         return null;
@@ -138,13 +127,10 @@ export const getSignupsForEventByEventId = async (messageId: string): Promise<Si
                 query($eventId: String!) {
                     allEventSignups(condition: { eventId: $eventId }) {
                         nodes {
-                            rowId
+                            id
                             eventId
                             status
                             userId
-                            eventByEventId {
-                                rowId
-                            }
                         }
                     }
                 }
@@ -152,14 +138,17 @@ export const getSignupsForEventByEventId = async (messageId: string): Promise<Si
         });
 
         const data = result.data.allEventSignups.nodes;
+        console.log(1, data);
         // TODO: check result data
-        return data.map((element: any) => ({
-            rowId: element.rowId,
-            eventId: element.eventId,
-            status: element.status,
-            userId: element.userId,
-            eventRowId: element.eventByEventId.rowId
-        }));
+        return data.map((element: any) => {
+            const { id, eventId, status, userId } = element;
+            return {
+                id,
+                eventId,
+                status,
+                userId
+            };
+        });
     } catch (error) {
         console.error(`${TAG}/getSignupsForEventByEventId | ${error}`);
         return [];

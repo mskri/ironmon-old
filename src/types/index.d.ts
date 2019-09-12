@@ -9,11 +9,18 @@ import {
     PermissionString
 } from 'discord.js';
 
-export type CommandConfig = {
+export type TriggerConfig = {
     triggers: string[];
-    channels: PermissionChannels;
-    roles: PermissionRoles;
-    permissionFlags: PermissionString[];
+    guildId: string;
+    channels: {
+        whitelisted: string[];
+        blacklisted: string[];
+    };
+    roles: {
+        whitelisted: string[];
+        blacklisted: string[];
+    };
+    permissionFlags: String[];
     options?: {
         [key: string]: string;
     };
@@ -41,7 +48,7 @@ export type Action = {
     message: Message;
     command: Command;
     execute: () => void;
-    config: CommandConfig | null;
+    config: TriggerConfig | null;
 };
 
 export type ActionType = 'MESSAGE' | 'REACTION';
@@ -95,7 +102,7 @@ export type InputArgs = {
 };
 
 export type AttendanceEvent = {
-    rowId: number;
+    id: number;
     title: string;
     description: string;
     startTime: Date;
@@ -111,9 +118,8 @@ export type AttendanceEvent = {
 export type SignupStatus = 'accepted' | 'declined';
 
 export type Signup = {
-    rowId: number;
+    id: number;
     status: SignupStatus;
     eventId: string;
     userId: string;
-    eventRowId: string;
 };

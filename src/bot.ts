@@ -12,10 +12,19 @@ import { actionQueue } from './commands/queue';
 import { getMessageTrigger, getReactionListener } from './commands/helpers';
 import commands from './commands';
 import preventDM from './utils/prevent-dm';
+import { getAllTriggerConfigGroups, getTriggerConfig } from './database/trigger-configs';
+// import { TriggerConfig } from 'types';
 
 // Note: should match MESSAGE_REACTION_ADD or MESSAGE_REACTION_REMOVE from discord.js
 // if discord.js changes that they should be changed to reflect the new ones here too.
 const RAW_EVENTS_TO_LISTEN = ['MESSAGE_REACTION_ADD', 'MESSAGE_REACTION_REMOVE'];
+
+// Pre-fetch configs so that apollo will cache them
+const preFetchConfigs = async () => {
+    console.log('Fetching trigger configs from db...');
+    await getAllTriggerConfigGroups();
+    console.log('Trigger configs fetched!');
+};
 
 export const onGuildCreate = (guild: Guild) => {
     console.log(
@@ -31,13 +40,14 @@ export const onError = (error: Error) => {
     console.error(`Unexpected error happened: ${error.message}`);
 };
 
-export const onReady = (client: Client) => {
+export const onReady = async (client: Client) => {
     const { username: botUsername, id: botId } = client.user;
     console.log(`Logged in as ${botUsername} (${botId})`);
+    await preFetchConfigs();
     console.log(`Reporting for duty!`);
 };
 
-export const onMessage = (client: Client, message: Message) => {
+export const onMessage = async (client: Client, message: Message) => {
     // Ignore bots
     if (message.author.bot) return;
 
@@ -49,12 +59,15 @@ export const onMessage = (client: Client, message: Message) => {
     const messageTrigger = getMessageTrigger(commands, message.content);
     if (!messageTrigger) return;
 
+    const guildId = message.guild.id;
+    const config = await getTriggerConfig(guildId, messageTrigger.name);
     const author: GuildMember = message.member;
     const action = createAction({
         event: { type: 'MESSAGE_CREATE' },
         author,
         message,
-        command: messageTrigger
+        command: messageTrigger,
+        config
     });
 
     actionQueue.next(action);
@@ -75,7 +88,7 @@ export const onRaw = async (client: Client, event: any) => {
     if (user.bot || !channel || channel.type !== 'text') return;
 
     // Get the message and emoji's from it (reactions) - Note: fetches only message from text channel!
-    const message: Message = await (<TextChannel>channel).fetchMessage(data.message_id);
+    const message: Message = await (channel as TextChannel).fetchMessage(data.message_id);
     const guild: Guild = client.guilds.get(data.guild_id)!;
     const author: GuildMember = guild.members.find(member => member.id === user.id);
     const emojiKey: string = data.emoji.id
@@ -94,6 +107,8 @@ export const onRaw = async (client: Client, event: any) => {
     const reactionListener = getReactionListener(commands, reaction.emoji);
     if (!reactionListener) return;
 
+    const guildId = message.guild.id;
+    const config = await getTriggerConfig(guildId, reactionListener.name);
     const action = createAction({
         event: {
             type: event.t,
@@ -102,7 +117,8 @@ export const onRaw = async (client: Client, event: any) => {
         },
         author,
         message,
-        command: reactionListener
+        command: reactionListener,
+        config
     });
 
     actionQueue.next(action);

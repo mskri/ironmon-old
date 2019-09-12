@@ -9,14 +9,20 @@ import {
 import {
     PermissionChannels,
     PermissionRoles,
-    CommandConfig,
+    TriggerConfig,
     Action,
     Command,
     ActionEvent
 } from '../types';
 
-export const hasConfig = (config: CommandConfig | null): boolean => {
-    return config != null;
+export const hasConfig = (config: TriggerConfig | null): boolean => {
+    const isConfigFound = config != null;
+
+    if (!isConfigFound) {
+        console.log('Config for trigger was not found');
+    }
+
+    return isConfigFound;
 };
 
 export const isInAllowedChannel = (
@@ -48,14 +54,16 @@ export const isInAllowedChannel = (
 };
 
 export const authorHasPermissionFlags = (
-    permissionFlags: PermissionString[],
+    permissionFlags: String[],
     author: GuildMember
 ): boolean => {
     // TODO: will crash app, should not!
     if (!permissionFlags) throw new Error('No required permissionsFlags defined');
     if (permissionFlags.length === 0) return true;
 
-    const hasAllRequiredPermissions = permissionFlags.every(flag => author.hasPermission(flag));
+    const hasAllRequiredPermissions = permissionFlags.every(flag =>
+        author.hasPermission(flag as PermissionString)
+    );
 
     if (!hasAllRequiredPermissions) {
         console.error(
@@ -103,6 +111,7 @@ export const createAction = (opts: {
     author: GuildMember;
     message: Message;
     command: Command;
+    config: TriggerConfig | null;
 }): Action => {
     const { event, author, message, command } = opts;
 
@@ -140,5 +149,5 @@ export const createAction = (opts: {
         }
     };
 
-    return Object.assign({}, opts, { execute, config: null });
+    return Object.assign({}, opts, { execute });
 };

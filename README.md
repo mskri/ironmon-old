@@ -29,7 +29,7 @@ This project uses [postgraphile](https://www.graphile.org/postgraphile/) to run 
 To start the server locally use following command:
 
 ```bash
-postgraphile -c postgres://<username>:<password>@<host>:<port>/<database> -a -j
+postgraphile -c postgres://<username>:<password>@<host>:<port>/<database>
 ```
 
 ### Develop locally

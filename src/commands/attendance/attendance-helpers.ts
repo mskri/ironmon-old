@@ -51,10 +51,10 @@ export const createEvent = async (args: InputArgs, message: Message): Promise<At
     const endTime: Date = calculateEndTime(startTime, duration);
     const description: string = createDescriptionText(startTime, endTime, details);
 
-    const rowId: number = await fetchLastEventId();
+    const id: number = await fetchLastEventId();
 
     return {
-        rowId,
+        id,
         title,
         description,
         startTime,
@@ -121,9 +121,9 @@ export const createEventEmbed = (data: {
     declinedUsers: GuildMember[];
 }): RichEmbed => {
     const { acceptedUsers, declinedUsers, noStatusUsers } = data;
-    const { rowId, description, color, title, url } = data.event;
+    const { id, description, color, title, url } = data.event;
     const colorInt: number = parseInt(color.replace('#', '0x')) || 0x000000;
-    const eventId = `#${rowId}`;
+    const eventId = `#${id}`;
     const fields = createEmbedFields(acceptedUsers, declinedUsers, noStatusUsers);
 
     return new RichEmbed({

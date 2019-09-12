@@ -124,7 +124,7 @@ export default createCommand({
         const statusColor: number = statusColorMap.get(newStatus) || 0x000000;
         const signupEmbed = createSignupNoticeEmbed(
             author,
-            oldSignup.eventRowId,
+            oldSignup.eventId,
             statusColor,
             newStatus,
             oldStatus

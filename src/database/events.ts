@@ -43,15 +43,14 @@ export const saveEvent = async (
                         }
                     ) {
                         event {
-                            rowId
+                            id
                         }
                     }
                 }
             `
         });
 
-        const rowId = result.data.createEvent.event.rowId;
-        return rowId;
+        return result.data.createEvent.event.id;
     } catch (error) {
         console.error(`${TAG}/fetchEventByMessageId | ${error.message}`);
         return null;
@@ -65,7 +64,7 @@ export const fetchEventByMessageId = async (messageId: string): Promise<Attendan
             query: gql`
                 query($messageId: String!) {
                     eventByMessageId(messageId: $messageId) {
-                        rowId
+                        id
                         title
                         description
                         startTime
@@ -84,7 +83,7 @@ export const fetchEventByMessageId = async (messageId: string): Promise<Attendan
         if (data == null) throw new Error(`Event with messageId ${messageId} not found`);
 
         const {
-            rowId,
+            id,
             title,
             description,
             startTime,
@@ -96,8 +95,8 @@ export const fetchEventByMessageId = async (messageId: string): Promise<Attendan
             url
         } = data;
 
-        return <AttendanceEvent>{
-            rowId,
+        return {
+            id,
             title,
             description,
             startTime,
@@ -107,7 +106,7 @@ export const fetchEventByMessageId = async (messageId: string): Promise<Attendan
             channelId,
             color,
             url
-        };
+        } as AttendanceEvent;
     } catch (error) {
         console.error(`${TAG}/fetchEventByMessageId | ${error.message}`);
         return null;
@@ -122,7 +121,7 @@ export const fetchLastEventId = async (): Promise<number> => {
                 query {
                     allEvents(last: 1) {
                         nodes {
-                            rowId
+                            id
                         }
                     }
                 }
@@ -130,9 +129,9 @@ export const fetchLastEventId = async (): Promise<number> => {
         });
 
         const nodes = result.data.allEvents.nodes;
-        const rowId = nodes.length > 0 ? nodes[0].rowId : 0;
+        const id = nodes.length > 0 ? nodes[0].id : 0;
 
-        return parseInt(rowId) + 1;
+        return parseInt(id) + 1;
     } catch (error) {
         console.error(`${TAG}/fetchLastEventId | ${error.message}`);
         return -1;

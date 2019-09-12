@@ -8,7 +8,7 @@ import {
     ReactionEmoji,
     Emoji
 } from 'discord.js';
-import { Action, Command, CommandConfig } from '../types';
+import { Action, Command, TriggerConfig } from '../types';
 
 // TODO: make logging better, maybe util function? Now e.g. user's details need to be parsed multiple times
 
@@ -19,20 +19,20 @@ export const getCommandArguments = (message: string): string[] => {
         .split(' ');
 };
 
-export const addCommandConfigToAction = (
-    configs: { [key: string]: CommandConfig[] },
+export const addTriggerConfigToAction = (
+    configs: { [key: string]: TriggerConfig[] },
     action: Action
 ): Action => {
     const { message, command } = action;
-    const config = getCommandConfigForGuild(configs, message.guild.id, command.name);
+    const config = getTriggerConfigForGuild(configs, message.guild.id, command.name);
     return Object.assign(action, { config });
 };
 
-export const getCommandConfigForGuild = (
-    configs: { [key: string]: CommandConfig[] },
+export const getTriggerConfigForGuild = (
+    configs: { [key: string]: TriggerConfig[] },
     guildId: string,
     triggerName: string
-): CommandConfig | null => {
+): TriggerConfig | null => {
     return configs[guildId].find(conf => conf.triggers.includes(triggerName)) || null;
 };
 

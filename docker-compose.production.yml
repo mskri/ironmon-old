@@ -12,9 +12,7 @@ services:
     command: [
       "postgraphile",
       "--connection", "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_DATABASE}?ssl=1",
-      "--port", "5000",
-      "-j",
-      "-a"
+      "--port", "5000"
     ]
 
   ironmon:
