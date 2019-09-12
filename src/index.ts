@@ -1,5 +1,15 @@
+if (process.env.NODE_ENV === 'development') {
+    const path = require('path');
+    require('dotenv-safe').config({
+        path: path.join(__dirname, '../.env'),
+        example: path.join(__dirname, '../.env.example'),
+        allowEmptyValues: true
+    });
+}
+
 import 'source-map-support/register';
 import { Client, Message, Guild } from 'discord.js';
+
 import * as bot from './bot';
 
 const { BOT_AUTH_TOKEN } = process.env;
