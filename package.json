@@ -24,7 +24,7 @@
         "date-fns": "^2.1.0",
         "date-fns-timezone": "^0.1.4",
         "discord.js": "^11.5.1",
-        "graphql": "^14.5.4",
+        "graphql": "^14.6.0",
         "graphql-tag": "^2.10.1",
         "postgraphile": "^4.4.3",
         "rx-queue": "^0.8.5",
