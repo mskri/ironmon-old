@@ -26,7 +26,7 @@
         "discord.js": "^11.5.1",
         "graphql": "^14.5.4",
         "graphql-tag": "^2.10.1",
-        "postgraphile": "^4.4.3",
+        "postgraphile": "^4.7.0",
         "rx-queue": "^0.8.5",
         "typescript": "^3.6.3"
     },
